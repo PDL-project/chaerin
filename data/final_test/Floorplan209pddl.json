@@ -1,0 +1,4 @@
+{"task":"Put the Watch and KeyChain inside the Drawer.","robot_list":[2,3,5],"object_states":[{"name":"Drawer","contains":["Watch","KeyChain"],"state":null}],"trans":0,"max_trans":0}
+{"task":"Put the Box on the Sofa and the Bowl in the Box.","robot_list":[8,5],"object_states":[{"name":"Box","contains":["Bowl"],"state":null},{"name":"Sofa","contains":["Box"],"state":null}],"trans":1,"max_trans":1}
+{"task":"Put the Vase on the DiningTable and open the Book.","robot_list":[25,23],"object_states":[{"name":"DiningTable","contains":["Vase"],"state":null},{"name":"Book","contains":[],"state":"OPENED"}],"trans":0,"max_trans":0}
+{"task":"Open the Laptop and turn it ON.","robot_list":[24,25,23],"object_states":[{"name":"Laptop","contains":[],"state":"OPENED"},{"name":"Laptop","contains":[],"state":"ON"}],"trans":0,"max_trans":0}

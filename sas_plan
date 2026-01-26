@@ -1,0 +1,3 @@
+(gotoobject robot2 lightswitch)
+(switchoff robot2 lightswitch)
+; cost = 2 (unit cost)

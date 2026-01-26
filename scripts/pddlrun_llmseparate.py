@@ -894,11 +894,8 @@ class TaskManager:
 
 
     def load_dataset(self, test_file: str) -> Tuple[List[str], List[List[dict]], List[str], List[int], List[int]]:
-        """Load dataset from JSON file.
-        
-        Args:
-            test_file (str): Path to the test file
-            
+        """
+        json파일 읽고, 관련 정보 로드해오기
         """
         test_tasks = []
         robots_test_tasks = []
@@ -907,7 +904,7 @@ class TaskManager:
         min_trans_cnt_tasks = []
         
         try:
-            with open(test_file, "r") as f:
+            with open(test_file, "r") as f: #json 파일 한줄씩 읽어오기
                 for line in f.readlines():
                     values = list(json.loads(line).values())
                     test_tasks.append(values[0])
@@ -916,7 +913,7 @@ class TaskManager:
                     trans_cnt_tasks.append(values[3])
                     min_trans_cnt_tasks.append(values[4])
             
-            # Prepare robot configurations
+            # 로봇 ID값을 실제 로봇 정보들로 변환
             available_robots = []
             for robots_list in robots_test_tasks:
                 task_robots = []
@@ -1044,7 +1041,7 @@ class TaskManager:
             self.combined_plan = []
             self.code_planpddl = []
             
-            # Get domain content
+            # PDDL 도메인 파일 가져오기
             allaction_domain_path = os.path.join(self.resources_path, "allactionrobot.pddl")
             domain_content = self.file_processor.read_file(allaction_domain_path)
             
@@ -1970,7 +1967,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--gpt-version",
         type=str,
-        default="gpt-4o",
+        default="gpt-3.5-turbo",
         choices=['gpt-3.5-turbo', 'gpt-4o', 'gpt-3.5-turbo-16k']
     )
     parser.add_argument(

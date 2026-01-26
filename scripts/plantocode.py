@@ -115,7 +115,7 @@ class LLMHandler:
 class MimicFormatTranslator:
     """Translates complete PDDL plans to mimic format using OpenAI API."""
     
-    def __init__(self, api_key_file: str, gpt_version: str = "gpt-4o"):
+    def __init__(self, api_key_file: str, gpt_version: str = "gpt-3.5-turbo"):
         self.gpt_version = gpt_version
         self.llm = LLMHandler(api_key_file)
         print(f"Initialized MimicFormatTranslator with {gpt_version}")
@@ -894,7 +894,7 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Translate complete PDDL plans to AI2-THOR executable code using OpenAI API. Can load from JSON files or PDDL log directories created by pddlrun_llmseparate.py')
     parser.add_argument('--openai-api-key-file', type=str, default="api_key",
                        help='Path to OpenAI API key file')
-    parser.add_argument('--gpt-version', type=str, default="gpt-4o",
+    parser.add_argument('--gpt-version', type=str, default="gpt-3.5-turbo",
                        choices=['gpt-3.5-turbo', 'gpt-4o', 'gpt-3.5-turbo-16k'],
                        help='GPT model version to use')
     parser.add_argument('--input-source', type=str, choices=['json', 'pddl_logs'], default='pddl_logs',

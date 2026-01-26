@@ -1,0 +1,47 @@
+To generate the problem file for the given domain and task of putting an apple in the fridge, we need to follow these steps:
+
+Step 1: Identify Objects and Initial State
+
+Objects Involved:
+- Robots: robot1
+- Object: apple
+- Object: fridge
+- Initial location of apple, fridge
+
+Initial States:
+- at-location apple counterTop
+- at-location fridge kitchen
+- inaction robot1
+
+Step 2: Define Goals
+
+Goals:
+- at-location apple fridge
+
+PDDL Problem File:
+
+```pddl
+(define (problem put_apple_in_fridge_problem)
+  (:domain robot1)
+  (:objects
+    robot1 - robot
+    apple - object
+    fridge - object
+    counterTop - object
+    kitchen - object
+  )
+  (:init
+    (at robot1 counterTop)
+    (at-location apple counterTop)
+    (at-location fridge kitchen)
+    (inaction robot1)
+  )
+  (:goal
+    (and
+      (at-location apple fridge)
+    )
+  )
+)
+```
+
+Problem file generation is done.
