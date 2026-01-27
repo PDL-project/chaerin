@@ -1,0 +1,23 @@
+# API keys
+api_key.txt
+scripts/api_key.txt
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Planner outputs
+sas_plan
+
+# Logs
+logs/
+
+# Generated PDDL artifacts
+resources/subtask_pddl_plans/
+resources/subtask_pddl_problems/
+resources/validated_subtask/
+resources/precondition_subtasks/
+
+# Backup files
+resources/*copy*.pddl
+resources/*origin*.pddl

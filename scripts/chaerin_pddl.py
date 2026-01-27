@@ -62,9 +62,25 @@ class PDDLUtils:
         controller = None
         try:
             controller = ai2thor.controller.Controller(scene=f"FloorPlan{floor_plan}")
-            obj = [obj["objectType"] for obj in controller.last_event.metadata["objects"]] #현재 씬의 객체 메타데이터 가져오기
-            obj_mass = [obj["mass"] for obj in controller.last_event.metadata["objects"]]
-            return PDDLUtils.convert_to_dict_objprop(obj, obj_mass) # list를 딕서너리 리스트로 변환하는 함수 호출 후 리턴
+            objects_ai = []
+
+            for obj in controller.last_event.metadata["objects"]:
+                name = obj["objectType"]
+                mass = obj.get("mass", 0.0)
+                parents = obj.get("parentReceptacles")
+                if parents:
+                    locations = [p.split("|")[0] for p in parents]
+                else:
+                    locations = ["Floor"]
+
+                objects_ai.append({
+                    "name": name,
+                    "mass": mass,
+                    "locations": locations
+                })
+
+            return objects_ai
+
         finally:
             if controller:
                 controller.stop()
@@ -88,6 +104,16 @@ class FileProcessor:
         self.subtask_path = os.path.join(base_path, "resources", "generated_subtask")#LLM이 만든 pddl problem을 쪼개서 저장하는 곳(검증전)
         self.validated_subtask_path = os.path.join(base_path, "resources", "validated_subtask")  #pddl problem을 검증한걸 저장하는 곳(검증후)
         self.each_run_path = os.path.join(base_path, "resources", "each_run") # 매 실행할때마다 실행별 기록을 저장하는 곳
+
+        self.subtask_pddl_problems_path = os.path.join(base_path, "resources", "subtask_pddl_problems") #각 서브테스크에 대한 pddl problems 저장해놓는 곳
+        os.makedirs(self.subtask_pddl_problems_path, exist_ok=True)
+
+        self.subtask_pddl_plans_path = os.path.join(base_path, "resources", "subtask_pddl_plans") #각 서브테스크에 대한 pddl plans 저장해놓는 곳
+        os.makedirs(self.subtask_pddl_plans_path, exist_ok=True)
+
+        self.precondition_subtasks_path = os.path.join(base_path, "resources", "precondition_subtasks") #각 서브테스크에 대한 pddl만들기 위한 사전컨디션 규칙 정해놓은 파일 저장해놓는 곳
+        os.makedirs(self.precondition_subtasks_path, exist_ok=True)
+
         os.makedirs(self.subtask_path, exist_ok=True)
         os.makedirs(self.validated_subtask_path, exist_ok=True) 
         os.makedirs(self.each_run_path, exist_ok=True)
@@ -160,6 +186,18 @@ class FileProcessor:
         except Exception as e:
             raise PDDLError(f"PDDL tasks 분리 과정에서 에러남: {str(e)}")
     
+    def normalize_pddl(self, text: str) -> str: #이거 함수 지우면 안댐!@@@
+        if not text:
+            return ""
+        text = text.replace("```pddl", "").replace("```", "").replace("`", "")
+        # (define부터 시작하도록 자르기
+        i = text.find("(define")
+        if i != -1:
+            text = text[i:]
+        # '#'로 시작하는 라인 제거
+        lines = [ln for ln in text.splitlines() if not ln.strip().startswith("#")]
+        return "\n".join(lines).strip()
+
     def balance_parentheses(self, content: str) -> str:
         """
         LLM이 만든 pddl이 종종 괄호가 깨져서, 첫번째 완전한 괄호 덩어리만 잘라서 반환해주는 함수
@@ -348,67 +386,6 @@ class FileProcessor:
             print(f"결과에서 추출할때 에러남: {str(e)}")
             return ""
 
-    def calculate_task_completion_rate(self) -> Tuple[int, int]:
-        """
-        *_plan.txt 파일들 읽어서 "Solution found!" 개수 세서
-        성공한 subtask 수, 전체 subtask 수를 계산해주는 함수
-        """
-        TC = 0
-        total_subtasks = 0
-
-        for file_path in glob.glob(os.path.join(self.subtask_path, '*_plan.txt')):
-            print("Calculating completion for file:", file_path)
-            total_subtasks += 1
-            content = self.read_file(file_path)
-            TC += content.count('Solution found!')
-            print(f"File: {file_path}, Solutions found: {content.count('Solution found!')}")
-        
-        print(f"Total completed tasks: {TC}, Total subtasks: {total_subtasks}")
-        return TC, total_subtasks
-
-    def parse_bddl_file(self, bddl_file_path: str) -> Dict[str, Any]:
-        """BDDL 파일(문제 정의 파일)에서
-        task 이름, objects 섹션, init 섹션, goal 섹션을 문자열로 뽑아 딕셔너리로 반환해주는 함수
-            
-        Returns:
-            Dict with keys:
-                - task_name: str
-                - objects: List[Dict]
-                - init_state: List[str]
-                - goal_state: List[str]
-        """
-        try:
-            content = self.read_file(bddl_file_path)
-            
-            # (define \(problem 추출
-            task_pattern = r'\(define \(problem (.*?)\)'
-            task_match = re.search(task_pattern, content)
-            task_name = task_match.group(1) if task_match else ""
-            
-            # (:objects 추출
-            objects_pattern = r'\(:objects(.*?)\)'
-            objects_match = re.search(objects_pattern, content, re.DOTALL)
-            objects_section = objects_match.group(1) if objects_match else ""
-            
-            # (:init 추출
-            init_pattern = r'\(:init(.*?)\)'
-            init_match = re.search(init_pattern, content, re.DOTALL)
-            init_state = init_match.group(1) if init_match else ""
-            
-            # (:goal 추출
-            goal_pattern = r'\(:goal(.*?)\)\s*\)'
-            goal_match = re.search(goal_pattern, content, re.DOTALL)
-            goal_state = goal_match.group(1) if goal_match else ""
-            
-            return {
-                "task_name": task_name,
-                "objects": objects_section.strip(),
-                "init_state": init_state.strip(),
-                "goal_state": goal_state.strip()
-            }
-        except Exception as e:
-            raise PDDLError(f"BDDL file 파싱 에러: {str(e)}")
-
 class LLMHandler:
     """
     LLM한테 입력값 보내고, 답변 받아오는 LLM 담당자 객체
@@ -515,7 +492,6 @@ class LLMHandler:
             except Exception as e:
                 raise LLMError(f"Unexpected error in LLM query: {str(e)}")
 
-
 class TaskManager:
     """ 
     파이프라인 총괄 매니저, 여러 모듈들 관리
@@ -523,13 +499,6 @@ class TaskManager:
     
     def __init__(self, base_path: str, gpt_version: str, api_key_file: str, prompt_decompse_set: str = "pddl_train_task_decomposesep", prompt_allocation_set: str = "pddl_train_task_allocationsep"):
         """task manager 생성자, 초기 설정
-        
-        Args:
-            base_path (str): Base path for all operations
-            gpt_version (str): Version of GPT to use
-            api_key_file (str): Path to the API key file
-            prompt_decompse_set (str): Name of the decomposition prompt set
-            prompt_allocation_set (str): Name of the allocation prompt set
         """
         self.base_path = base_path
         self.gpt_version = gpt_version
@@ -548,49 +517,49 @@ class TaskManager:
         os.makedirs(self.logs_path, exist_ok=True)
         
         # subtask 폴더 비우기
-        self.clean_generated_subtask_directory(False)
-        self.clean_generated_subtask_directory(True) 
+        self.clean_all_resources_directories()
         
         # 결과 저장소 초기화
         self.decomposed_plan: List[str] = []
         self.parsed_subtasks: List[List[dict]] = []
+        self.precondition_subtasks: List[List[dict]] = []
+
         self.subtask_pddl_problems: List[List[dict]] = []
-
-
-        self.allocated_plan: List[str] = []
-        self.code_plan: List[str] = []
-        self.validated_plan: List[str] = []  
-        self.combined_plan: List[str] = []
-        self.code_planpddl: List[str] = []
-        self.sequence_operations: str = ""  
-        self.tc: List[int] = []
-        self.total_subtasks: List[int] = []
+        self.subtask_pddl_plans: List[str] = []
         
-        # Get action mapping from actions module
-        
-        # Initialize objects_ai as None, will be set in process_tasks
         self.objects_ai = None
 
-    def clean_generated_subtask_directory(self, isValidated: bool = False) -> None:
-        """Clean the generated subtask directory."""
-        if isValidated:
-            directory = os.path.join(self.resources_path, "validated_subtask")  #PG: Changed for validation
-        else:
-            directory = os.path.join(self.resources_path, "generated_subtask")
-        try:
-            if os.path.exists(directory):
+    def clean_all_resources_directories(self) -> None:
+        """
+        resources/. 아래 생성된 폴더들의 파일들 전부 지우는 함수
+        """
+        target_dirs = [
+            "generated_subtask",
+            "precondition_subtasks",
+            "subtask_pddl_problems",
+            "validated_subtask",
+            "subtask_pddl_plans",
+        ]
+
+        for dir_name in target_dirs:
+            directory = os.path.join(self.resources_path, dir_name)
+
+            try:
+                if not os.path.exists(directory):
+                    continue
+
                 for filename in os.listdir(directory):
                     file_path = os.path.join(directory, filename)
                     try:
-                        if os.path.isfile(file_path):
+                        if os.path.isfile(file_path) or os.path.islink(file_path):
                             os.unlink(file_path)
                         elif os.path.isdir(file_path):
                             shutil.rmtree(file_path)
                     except Exception as e:
-                        print(f"Error cleaning {file_path}: {str(e)}")
-        except Exception as e:
-            print(f"Error accessing directory {directory}: {str(e)}")
-    
+                        print(f"[CLEAN ERROR] Failed to remove {file_path}: {e}")
+
+            except Exception as e:
+                print(f"[CLEAN ERROR] Failed to access directory {directory}: {e}")
 
 
     def load_dataset(self, test_file: str) -> Tuple[List[str], List[List[dict]], List[str], List[int], List[int]]:
@@ -636,16 +605,7 @@ class TaskManager:
                    gt_test_tasks: List[str], trans_cnt_tasks: List[int], 
                    min_trans_cnt_tasks: List[int], objects_ai: str,
                    bddl_file_path: Optional[str] = None):
-        """Log results including BDDL file if provided."""
-        # print(f"\n[DEBUG] Logging task {idx + 1}")
-        # print(f"Current list lengths:")
-        # print(f"- code_planpddl: {len(self.code_planpddl)}")
-        # print(f"- combined_plan: {len(self.combined_plan)}")
-        # print(f"- decomposed_plan: {len(self.decomposed_plan)}")
-        # print(f"- allocated_plan: {len(self.allocated_plan)}")
-        # print(f"- code_plan: {len(self.code_plan)}")
-        # print(f"- validated_plan: {len(self.validated_plan)}")  #PG: Added for validation
-        
+
         date_time = datetime.now().strftime("%m-%d-%Y-%H-%M-%S")
         task_name = "_".join(task.split()).replace('\n', '')
         folder_name = f"{task_name}_plans_{date_time}"
@@ -667,24 +627,49 @@ class TaskManager:
 
             path = os.path.join(subtask_pddl_dir, filename)
             self.file_processor.write_file(path, pddl_text)
-
         
+        # === Save precondition subtasks (LLM-generated preconditions/goals) ===
+        precondition_dir = os.path.join(log_folder, "precondition_subtasks")
+        os.makedirs(precondition_dir, exist_ok=True)
+
+        for item in self.precondition_subtasks[idx]:
+            sid = item.get("subtask_id", "unknown")
+            title = item.get("subtask_title", "untitled")
+            pre_text = item.get("pre_goal_text", "")
+
+            safe_title = re.sub(r'[^a-zA-Z0-9_\-]+', '_', title).strip('_')
+            filename = f"pre_{sid:02d}_{safe_title}.txt"
+
+            path = os.path.join(precondition_dir, filename)
+            self.file_processor.write_file(path, pre_text)
+
+        # === Save validated subtask PDDL problems (LLM validator outputs) ===
+        val_subtask_pddl_dir = os.path.join(log_folder, "val_subtask_pddl_problems")
+        os.makedirs(val_subtask_pddl_dir, exist_ok=True)
+
+        src_val_dir = self.file_processor.validated_subtask_path  # resources/validated_subtask
+        for file_name in os.listdir(src_val_dir):
+            if file_name.endswith(".pddl"):
+                src_path = os.path.join(src_val_dir, file_name)
+                dst_path = os.path.join(val_subtask_pddl_dir, file_name)
+                shutil.copy(src_path, dst_path)
+
+        # === Save subtask PDDL plans (fastdownward outputs) ===
+        plan_action_pddl_dir = os.path.join(log_folder, "subtask_pddl_plans")
+        os.makedirs(plan_action_pddl_dir, exist_ok=True)
+
+        plans_dir = self.file_processor.subtask_pddl_plans_path  # resources/validated_subtask
+        for file_name in os.listdir(plans_dir):
+            if file_name.endswith("actions.txt"):
+                main_path = os.path.join(plans_dir, file_name)
+                sub_path = os.path.join(plan_action_pddl_dir, file_name)
+                shutil.copy(main_path, sub_path)
+
         try:
-            print(f"Writing plans for task {idx + 1}")
-            self._write_plan(log_folder, "code_planpddl.py", self.code_planpddl[idx])
-            #print(f"Successfully wrote code_planpddl for task {idx + 1}")
-            self._write_plan(log_folder, "combined_plan.py", self.combined_plan[idx])
-            #print(f"Successfully wrote combined_plan for task {idx + 1}")
-            self._write_plan(log_folder, "decomposed_plan.py", self.decomposed_plan[idx])
-            #print(f"Successfully wrote decomposed_plan for task {idx + 1}")
-            self._write_plan(log_folder, "allocated_plan.py", self.allocated_plan[idx])
-            #print(f"Successfully wrote allocated_plan for task {idx + 1}")
-            self._write_plan(log_folder, "code_plan.py", self.code_plan[idx])
-            #print(f"Successfully wrote code_plan for task {idx + 1}")
-            self._write_plan(log_folder, "validated_plan.py", self.validated_plan[idx])  #PG: Added for validation
-            #print(f"Successfully wrote validated_plan for task {idx + 1}")
             
-            # Log main information
+            self._write_plan(log_folder, "decomposed_plan.py", self.decomposed_plan[idx])
+            self._write_plan(log_folder, "validated_plan.py", self.validated_plan[idx])
+            
             TC, total_subtasks = self.tc[idx], self.total_subtasks[idx]
             print(f"Task {idx + 1} - TC: {TC}, Total Subtasks: {total_subtasks}")
 
@@ -700,7 +685,6 @@ class TaskManager:
                 f.write(f"\nTotalsuccesssubtask = {TC}")
                 f.write(f"\nTotalsubtask = {total_subtasks}")
             
-            # Copy generated subtasks
             subtask_folder = os.path.join(log_folder, "generated_subtask")
             os.makedirs(subtask_folder)
             source_folder = os.path.join(self.resources_path, "generated_subtask")
@@ -709,8 +693,6 @@ class TaskManager:
                 if os.path.isfile(full_file_name):
                     shutil.copy(full_file_name, subtask_folder)
             
-            #PG: Added for validation
-            # Copy validated subtasks
             validated_subtask_folder = os.path.join(log_folder, "validated_subtask")
             os.makedirs(validated_subtask_folder)
             source_validated_folder = os.path.join(self.resources_path, "validated_subtask")
@@ -719,13 +701,6 @@ class TaskManager:
                 if os.path.isfile(full_file_name):
                     shutil.copy(full_file_name, validated_subtask_folder)
 
-
-            # Add BDDL file to logs if provided
-            if bddl_file_path and os.path.exists(bddl_file_path):
-                bddl_content = self.file_processor.read_file(bddl_file_path)
-                bddl_output_path = os.path.join(log_folder, "task.bddl")
-                self.file_processor.write_file(bddl_output_path, bddl_content)
-            
         except Exception as e:
             print(f"Error writing plans for task {idx + 1}: {str(e)}")
 
@@ -756,13 +731,10 @@ class TaskManager:
             # 결과 리스트 초기화
             self.decomposed_plan = []
             self.parsed_subtasks = []
+            self.precondition_subtasks =[]
             self.subtask_pddl_problems = []
-
-            self.allocated_plan = []
-            self.code_plan = []
-            self.validated_plan = [] 
-            self.combined_plan = []
-            self.code_planpddl = []
+            self.validated_plan = []
+            self.subtask_pddl_plans = []
             
             # PDDL 도메인 파일 가져오기
             #(allactionrobot.pddl ->로봇이 어떤 행동을 할수 있고, 어떤 조건이 필요하고, 행동하면 머가 변하는지를 정의한 규칙정리서)
@@ -776,8 +748,7 @@ class TaskManager:
                 print(f"{'='*50}")
                 
                 # 이번 task 흔적 지우기
-                self.clean_generated_subtask_directory()
-                self.clean_generated_subtask_directory(True)
+                self.clean_all_resources_directories()
                 
                 # 1. task 분해, decomposed_plan 생성 -> 자연어 task를 여러개의 subtask로 쪼개기 + 필요한 스킬과 오브젝트 선정
                 decomposed_plan = self._generate_decomposed_plan(task, domain_content, robots, objects_ai)
@@ -787,85 +758,52 @@ class TaskManager:
                 print("decomposed plan:\n", decomposed_plan)
                 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                 
-                # 2. 각각의 서브 테스크 별로 분리 후, pddl problem 정의
+                # 2. 각각의 서브 테스크 별로 분리 후, 도메인 최적화 정의
                 parsed_subtasks = self._decomposed_plan_to_subtasks(decomposed_plan) #분리
                 print("✓ Parsed Decomposed Plan generated")
                 print("parsed decomposed plan:\n", parsed_subtasks)
                 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-                subtask_pddl_problems = self._generate_subtask_pddl_problems(parsed_subtasks, domain_content, robots, objects_ai)
+                precondition_subtasks = self._generate_precondition_subtasks(parsed_subtasks, domain_content, robots, objects_ai)
+                self.precondition_subtasks.append(precondition_subtasks) 
+                print("✓ Precondition Decomposed Plan generated")
+                print("Precondition Decomposed Plan:\n", precondition_subtasks)
+                print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+                for item in precondition_subtasks:
+                    sid = item.get("subtask_id", -1)
+                    title = item.get("subtask_title", "untitled")
+                    text = item.get("pre_goal_text", "")
+
+                    safe_title = re.sub(r'[^a-zA-Z0-9_\-]+', '_', title).strip('_')
+                    filename = f"pre_{sid:02d}_{safe_title}.txt"   # 확장자 txt 추천 (PDDL problem이 아니라서)
+
+                    out_path = os.path.join(self.file_processor.precondition_subtasks_path, filename)
+                    self.file_processor.write_file(out_path, text)
+
+                #3. 서브테스크에 대한 pddl problem 정의
+
+                subtask_pddl_problems = self._generate_subtask_pddl_problems(precondition_subtasks, domain_content, robots, objects_ai)
                 self.subtask_pddl_problems.append(subtask_pddl_problems)
+
                 print("✓ PDDL problems generated")
                 print("PDDL problems plan:\n", subtask_pddl_problems)
                 print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
+                for item in subtask_pddl_problems:
+                    sid = item["subtask_id"]
+                    title = item["subtask_title"]
+                    pddl_text = item["problem_text"]
 
+                    safe_title = re.sub(r'[^a-zA-Z0-9_\-]+', '_', title).strip('_')
+                    filename = f"subtask_{sid:02d}_{safe_title}.pddl"
 
+                    out_path = os.path.join(self.file_processor.subtask_pddl_problems_path, filename)
+                    self.file_processor.write_file(out_path, pddl_text)
 
+                # 3. FastDownward 돌려서, pddl plan 생성
+                validated_plan = self._validate_and_plan()
 
-
-
-
-                '''
-                allocated_plan = self._generate_allocation_plan(decomposed_plan, robots, objects_ai)
-                self.allocated_plan.append(allocated_plan)
-                print("✓ Allocation plan generated")
-                #print("Allocation Plan:\n", allocated_plan)
-                #print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-                
-                #print("Waiting for content summary...")
-                #time.sleep(60)  
-                
-                # Generate problem summary
-                problem_summary = self._generate_problem_summary(decomposed_plan, allocated_plan, robots)
-                print("✓ Problem summary generated")
-                #print("Problem Summary:\n", problem_summary)
-                #print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-
-                #print("Waiting to generate problem files...")
-                #time.sleep(60)  
-                
-                # Generate and store problem files
-                code_plan = self._generate_problem_files(problem_summary)
-                self.code_plan.append(code_plan) 
-                print("✓ Problem files generated")
-                # print("Code Plan:\n", code_plan)
-                # print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-
-                # Split into subtasks
-                self.file_processor.split_pddl_tasks(code_plan, False)
-                print("✓ Split into subtasks complete")
-                #input("Press Enter to continue")
-                #print("Waiting for files to be processed...")
-                #time.sleep(50)
-                
-                # Validate and plan
-                self._validate_and_plan()
-                print("✓ Validation and planning complete")
-                
-                # Combine and process plans
-                combined_plan = self._combine_all_plans(decomposed_plan)
-                self.combined_plan.append(combined_plan)
-                print("✓ Plans combined")
-                #print("Combined Plan:\n", combined_plan)
-                #input("Press Enter to continue")
-
-                # Match references and store final PDDL plan
-                matched_plan = self._match_references_for_plan(combined_plan, objects_ai)
-                self.code_planpddl.append(matched_plan)
-                print("✓ References matched")
-                print("Final PDDL Plan:\n", matched_plan)
-
-                # Calculate completion rate
-                tc, total = self.planner.calculate_completion_rate()
-                self.tc.append(tc)
-                self.total_subtasks.append(total)
-                print(f"Task {task_idx + 1} completion rate: {tc}/{total}")
-                
-            print(f"\n{'='*50}")
-            print(f"All {len(test_tasks)} tasks processed")
-            print(f"{'='*50}")
-            '''
         except Exception as e:
             print(f"\n[ERROR] Task Processing Failed:")
             print(f"Error type: {type(e).__name__}")
@@ -903,10 +841,10 @@ class TaskManager:
             prompt += f"# Task Description: {task}"
             
             if "gpt" not in self.gpt_version:
-                _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=2000, stop=["def"], frequency_penalty=0.0)
+                _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=3000, stop=None, frequency_penalty=0.0)
             else:
                 messages = [{"role": "user", "content": prompt}]
-                _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=2000, frequency_penalty=0.0)
+                _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=3000, frequency_penalty=0.0)
             
             return text
             
@@ -929,58 +867,61 @@ class TaskManager:
                 ...
             ]
         """
-        # 줄바꿈 형식 통일 및 양 끝 공백 제거
-        text = decomposed_text.replace("\r\n", "\n").strip()
+        text = decomposed_text.replace("\r\n", "\n").replace("\r", "\n").strip()
 
-        # 각 SubTask 블록을 찾기 위한 정규식
-        # - "# SubTask N: 제목"으로 시작
-        # - 다음 SubTask, "# Task", 또는 텍스트 끝 전까지를 하나의 블록으로 인식
-        pattern = re.compile(
-            r"(?ms)^\s*#\s*SubTask\s*(\d+)\s*:\s*(.+?)\s*\n"   # 서브태스크 번호, 제목
-            r"(.*?)"                                         # 서브태스크 본문
-            r"(?=^\s*#\s*SubTask\s*\d+\s*:|^\s*#\s*Task\b|\Z)"  # 다음 SubTask / Task / 끝
+        header_re = re.compile(r"(?im)^\s*#?\s*Sub\s*Task\s*(\d+)\s*:\s*(.+?)\s*$")
+        headers = list(header_re.finditer(text))
+        if not headers:
+            return []
+
+        # initial condition 블록 정규식:
+        # "# Initial condition analyze ..." 다음 줄들(#1, #2, ...)까지를 한 덩어리로
+        initcond_re = re.compile(
+            r"(?ims)^\s*#\s*Initial\s+condition\s+analyze\s+due\s+to\s+previous\s+subtask\s*:\s*\n"
+            r"(?:\s*#\s*\d+\.\s*.*\n?)+"
         )
+
         subtasks: List[Dict] = []
 
-        # 모든 서브태스크 블록 순회
-        for m in pattern.finditer(text):
-            sub_id = int(m.group(1))           # 서브태스크 번호
-            title = m.group(2).strip()         # 서브태스크 제목
-            body = m.group(3).strip()          # 본문 (skills / objects 포함)
-            raw_block = m.group(0).strip()     # 원본 블록 전체
+        for i, h in enumerate(headers):
+            start = h.start()
+            end = headers[i + 1].start() if i + 1 < len(headers) else len(text)
 
-            # "Skills Required:" 라인에서 스킬 목록 추출 (대소문자 무시)
-            skills_match = re.search(
-                r"(?im)^\s*Skills\s+Required\s*:\s*(.+)$",
-                raw_block
-            )
+            sub_id = int(h.group(1))
+            title = h.group(2).strip()
+
+            # SubTask 본문 블록
+            body_block = text[start:end].strip()
+
+            prev_start = headers[i - 1].start() if i > 0 else 0
+            prev_region = text[prev_start:start]  # 이전 subtask 시작~현재 subtask 시작 직전
+
+            # prev_region 안에 initial condition이 여러 개 있을 수 있으니, 마지막 매치를 선택
+            init_matches = list(initcond_re.finditer(prev_region))
+            init_block = init_matches[-1].group(0).strip() if init_matches else ""
+
+            # raw_block 구성: init + subtask body
+            raw_block = (init_block + "\n\n" + body_block).strip() if init_block else body_block
+
+            # Skills / Related Objects 추출
             skills = []
-            if skills_match:
-                skills = [
-                    s.strip()
-                    for s in skills_match.group(1).split(",")
-                    if s.strip()
-                ]
-            # "Related Objects:" 또는 "Related Object:" 라인에서 오브젝트 목록 추출
-            obj_match = re.search(
-                r"(?im)^\s*Related\s+Objects?\s*:\s*(.+)$",
-                raw_block
-            )
             objects = []
-            if obj_match:
-                objects = [
-                    o.strip()
-                    for o in obj_match.group(1).split(",")
-                    if o.strip()
-                ]
 
-            # 파싱된 서브태스크 정보 저장
+            skills_match = re.search(r"(?im)^\s*-?\s*Skills\s+Required\s*:\s*(.+)$", body_block)
+            if skills_match:
+                skills = [s.strip() for s in skills_match.group(1).split(",") if s.strip()]
+
+            obj_match = re.search(r"(?im)^\s*-?\s*Related\s+Objects?\s*:\s*(.+)$", body_block)
+            if obj_match:
+                objects = [o.strip() for o in obj_match.group(1).split(",") if o.strip()]
+
             subtasks.append({
                 "id": sub_id,
                 "title": title,
                 "skills": skills,
                 "objects": objects,
-                "raw_block": raw_block
+                "raw_block": raw_block,
+                "initial_conditions": init_block,
             })
 
         return subtasks
@@ -1057,6 +998,80 @@ class TaskManager:
         # 현재 header는 action 이전까지 잘라온 것이므로 보통 아직 domain의 마지막 ')'는 없음.
         subdomain = header.rstrip() + "\n" + missing_comment + "\n\n" + "\n\n".join(selected_blocks) + "\n\n)"
         return subdomain
+    
+    def _generate_precondition_subtasks(self, parsed_subtasks: List[Dict[str, Any]], domain_content: str, robots: List[dict], objects_ai: str) -> List[Dict[str, Any]]:
+        """
+        서브태스크 리스트를 입력받아, 각 서브태스크별로 LLM을 호출해 PDDL problem을 위한 precondition과 goal을 추가해 반환해주는 함수
+
+        """
+        results: List[Dict[str, Any]] = []
+
+        try:
+            # 스킬/오브젝트 목록은 프롬프트 안정성을 위해 정렬
+            skills_sorted = sorted(set([s.strip() for s in robots if s and s.strip()]))
+
+            problem_example_prompt_path = os.path.join(self.base_path, "data", "pythonic_plans", f"chaerin_pddl_train_task_pre_pddl_problem.py")
+            problem_example_prompt = self.file_processor.read_file(problem_example_prompt_path)
+
+            for st in parsed_subtasks:
+                sub_id = st.get("id")
+                title = st.get("title", "").strip()
+                st_skills = st.get("skills", [])
+                st_objects = st.get("objects", [])
+
+                sub_domain = self.build_subdomain_for_skills(domain_content, st_skills)
+
+                prompt = ""
+                prompt += "You are a Robot task-to-action expander.\n"
+                prompt += "Your job is to EXPAND the given task decomposition into detailed action-level plans using a PDDL-style description.\n"
+
+                prompt += f"CURRENT ENVIRONMENT OBJECT LIST (ground-truth):\n{objects_ai}\n\n"
+                prompt += "This is the ONLY set of objects that exist in the current environment.\n"
+
+                prompt += f"OBJECTS SELECTED FROM THE PREVIOUS STEP (for this subtask):\n{st_objects}\n\n"
+                prompt += "These are the objects that were judged to be relevant/needed for this subtask.\n"
+                prompt += "You should prioritize using these objects when constructing the PDDL problem.\n"
+                prompt += "However, you may also use other objects from CURRENT ENVIRONMENT OBJECT LIST if needed.\n\n\n"
+
+                prompt += f"AVAILABLE ROBOT SKILLS (action names):\n{robots}\n\n"
+                prompt += "These are the ONLY actions you are allowed to use.\n"
+
+                prompt += f"SKILLS REQUIRED FOR THIS SUBTASK (selected from the previous step):{st_skills}\n"
+                prompt += "Your generated PDDL problem must be solvable using ONLY these skills.\n\n\n"
+
+                prompt += f"DOMAIN:\n{sub_domain}\n\n"
+                prompt += "There are the domain content containing ONLY the actions you are allowed/required to use.\n"
+                prompt += "Use this domain as the sole reference for predicates, action preconditions/effects.\n"
+
+                prompt += "OUTPUT FORMAT CONSTRAINT:\n"
+                prompt += "YOUR OUTPUT MUST BE ONLY the following expanded text (no markdown, no explanations)\n\n"
+
+                prompt += "=== EXAMPLE OUTPUT FORMAT START ===\n"
+                prompt += problem_example_prompt 
+                prompt += "\n=== EXAMPLE OUTPUT FORMAT END ===\n\n"
+                prompt += "\n\n=== SUBTASK TO SOLVE ===\n"
+
+                prompt += f"{st}\n\n"  
+                
+                if "gpt" not in self.gpt_version:
+                    _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=2000, stop=["def"], frequency_penalty=0.0)
+                else:
+                    messages = [{"role": "user", "content": prompt}]
+                    _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=2000, frequency_penalty=0.0)
+                result = {
+                    "subtask_id": sub_id,
+                    "subtask_title": title,
+                    "skills": st_skills,
+                    "objects": st_objects,
+                    "pre_goal_text": text,
+                    "raw_llm_output": text,
+                }
+                results.append(result)
+
+            return results
+
+        except Exception as e:
+            raise PDDLError(f"Error generating subtask PDDL problems: {str(e)}") from e
 
     def _generate_subtask_pddl_problems(self, parsed_subtasks: List[Dict[str, Any]], domain_content: str, robots: List[dict], objects_ai: str) -> List[Dict[str, Any]]:
         """
@@ -1088,8 +1103,8 @@ class TaskManager:
             problem_example_prompt = self.file_processor.read_file(problem_example_prompt_path)
 
             for st in parsed_subtasks:
-                sub_id = st.get("id")
-                title = st.get("title", "").strip()
+                sub_id = st.get("subtask_id")
+                title = st.get("subtask_title", "").strip()
                 st_skills = st.get("skills", [])
                 st_objects = st.get("objects", [])
 
@@ -1113,8 +1128,7 @@ class TaskManager:
                 prompt += f"SKILLS REQUIRED FOR THIS SUBTASK (selected from the previous step):{st_skills}\n"
                 prompt += "Your generated PDDL problem must be solvable using ONLY these skills.\n\n\n"
 
-                prompt += f"DOMAIN (restricted to REQUIRED SKILLS):\n{sub_domain}\n\n"
-                prompt += "There are the domain content containing ONLY the actions you are allowed/required to use.\n"
+                prompt += f"DOMAIN :\n{domain_content}\n\n"
                 prompt += "Use this domain as the sole reference for predicates, action preconditions/effects.\n"
 
                 prompt += "OUTPUT FORMAT CONSTRAINT:\n"
@@ -1126,9 +1140,10 @@ class TaskManager:
                 prompt += problem_example_prompt 
                 prompt += "\n=== EXAMPLE OUTPUT FORMAT END ===\n\n"
                 prompt += "\n\n=== SUBTASK TO SOLVE ===\n"
-                prompt += f"{title}\n\n"  
+                prompt += f"{st}\n\n"  
 
                 prompt += "=== WHAT YOU MUST GENERATE ===\n"
+                prompt += "Robot starts in the kitchen!\n"
                 prompt += "1) (:objects ...) must include ONLY objects that appear in CURRENT ENVIRONMENT OBJECT LIST.\n"
                 prompt += "2) (:init ...) must include ALL facts required to make the plan executable.\n"
                 prompt += "3) (:goal ...) must represent completion of THIS subtask only.\n\n"
@@ -1155,381 +1170,111 @@ class TaskManager:
         except Exception as e:
             raise PDDLError(f"Error generating subtask PDDL problems: {str(e)}") from e
 
-
-
-    def _generate_allocation_plan(self, decomposed_plan: str, robots: List[dict], objects_ai: str) -> str:
-        """Generate allocation plan for decomposed tasks.
-        
-        """
-        try:
-            # Read allocation prompt file
-            prompt_file = os.path.join(self.base_path, "data", "pythonic_plans", f"{self.prompt_allocation_set}_solution.py")
-            with open(prompt_file, "r") as allocated_prompt_file:
-                allocated_prompt = allocated_prompt_file.read()
-            
-            # Build prompt incrementally like the original
-            prompt = "\n"
-            prompt += allocated_prompt
-            prompt += decomposed_plan
-            prompt += f"\n# TASK ALLOCATION"
-            prompt += f"\n# Scenario: There are {len(robots)} robots available. The task should be performed using the minimum number of robots necessary. Robot should be assigned to subtasks that match its skills and mass capacity. Using your reasoning come up with a solution to satisfy all constraints."
-            prompt += f"\n\nrobots = {robots}"
-            prompt += f"\n{objects_ai}"
-            prompt += f"\n\n# IMPORTANT: The AI should ensure that the robots assigned to the tasks have all the necessary skills to perform the tasks. IMPORTANT: Determine whether the subtasks must be performed sequentially or in parallel, or a combination of both and allocate robots based on availability. "
-            prompt += f"\n# SOLUTION\n"
-            
-            # Handle different GPT versions like the original
-            if "gpt" not in self.gpt_version:
-                # older versions of GPT
-                _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=1000, stop=["def"], frequency_penalty=0.65)
-            elif "gpt-3.5" in self.gpt_version:
-                # gpt 3.5 and its variants
-                messages = [{"role": "user", "content": prompt}]
-                _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=1500, frequency_penalty=0.35)
-            else:          
-                # gpt 4.0o
-                messages = [{"role": "user", "content": prompt}]
-                _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=1500, frequency_penalty=0.69)
-            
-            return text
-            
-        except Exception as e:
-            raise PDDLError(f"Error generating allocation plan: {str(e)}")
-
-    def _generate_problem_summary(self, decomposed_plans: Union[str, List[str]], allocated_plans: Union[str, List[str]], available_robots: Union[List[dict], List[List[dict]]]) -> List[str]:
-        """Generate problem summaries from decomposed and allocated plans.
-        
-
-            
-        Returns:
-            List[str]: List of generated problem summaries
-        """
-        try:
-            #print("Generating Allocated summary...")
-            
-            # Convert single items to lists
-            if isinstance(decomposed_plans, str):
-                decomposed_plans = [decomposed_plans]
-            if isinstance(allocated_plans, str):
-                allocated_plans = [allocated_plans]
-            if not isinstance(available_robots[0], list):
-                available_robots = [available_robots]
-            
-            # Read summary prompt file
-            prompt_file = os.path.join(self.base_path, "data", "pythonic_plans", f"{self.prompt_allocation_set}_summary.py")
-            with open(prompt_file, "r") as code_prompt_file:
-                code_prompt = code_prompt_file.read()
-            
-            # Build base prompt once
-            base_prompt = " finish the problem content summary strictly following the example format"
-            base_prompt += "\n\n" + code_prompt + "\n\n"
-            
-            code_plan = []
-            # Process each plan
-            for i, (plan, solution) in enumerate(zip(decomposed_plans, allocated_plans)):
-                # Build prompt for this plan
-                prompt = base_prompt + plan
-                prompt += f"\n# TASK ALLOCATION"
-                prompt += f"\n\nrobots = {available_robots[i]}"
-                prompt += solution
-                prompt += f"\n# problem content summary  \n"
-                
-                if "gpt" not in self.gpt_version:
-                    # older versions of GPT
-                    _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=1000, stop=["def"], frequency_penalty=0.30)
-                else:            
-                    # using variants of gpt 4 or 3.5
-                    messages = [
-                        {"role": "system", "content": "You are a Robot PDDL problem Expert"},
-                        {"role": "user", "content": prompt}
-                    ]
-                    _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=1400, frequency_penalty=0.4)
-                
-                code_plan.append(text)
-            
-            return code_plan
-            
-        except Exception as e:
-            raise PDDLError(f"Error generating problem summary: {str(e)}")
-
-    def _generate_problem_files(self, problem_summary: Union[str, List[str]]) -> List[str]:
-        """Generate PDDL problem files from plans.
-        
-        """
-        # Handle list input by taking first summary
-        if isinstance(problem_summary, list):
-            problem_summary = problem_summary[0]
-        
-        problem_pddl = []
-        
-        # Split into subtasks and sequence operations
-        subtasks, sequence_operations = self.file_processor.split_and_store_tasks(
-            problem_summary,
-            llm=self.llm,
-            gpt_version=self.gpt_version
-        )
-
-        # print("subtasks", subtasks)
-        # print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-        # print("sequence operations", sequence_operations)
-        # print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-
-
-        # Store sequence operations for later use
-        self.sequence_operations = sequence_operations
-        
-        # Process each subtask using the class method
-        problem_pddl = self.problemextracting(
-            subtasks=subtasks,
-            llm=self.llm,
-            gpt_version=self.gpt_version,
-            file_processor=self.file_processor,
-            objects_ai=self.objects_ai,
-            prompt_allocation_set=self.prompt_allocation_set
-        )
-        
-        return problem_pddl
-    
-
-    def problemextracting(
-            self,
-            subtasks: List[str],
-            llm: 'LLMHandler',
-            gpt_version: str,
-            file_processor: 'FileProcessor',
-            objects_ai: str,
-            prompt_allocation_set: str
-        ) -> List[str]:
-        """Extract problem files from subtasks."""
-        problem_pddl: List[str] = []
-
-        # Robust matchers for the Assigned Robots block
-        assigned_block_re = re.compile(
-            r'(?is)\*\*Assigned\s*Robots?\*\*\s*:\s*(.*?)\n\*\*Objects\s*Involved\*\*\s*:',
-            re.IGNORECASE | re.DOTALL
-        )
-        assigned_block_fallback = re.compile(
-            r'(?is)\bAssigned\s*Robots?\b\s*:\s*(.*?)\n\bObjects\s*Involved\b\s*:',
-            re.IGNORECASE | re.DOTALL
-        )
-
-        # Match "robot 1" and "robots 1"
-        robot_num_re = re.compile(r'\brobots?\s*(\d+)\b', re.IGNORECASE)
-
-        # Phrases that imply "pick a single robot among the listed ones"
-        single_choice_phrase_re = re.compile(
-            r'\b(any\s+one|either|one\s+of|choose\s+one|pick\s+one|any\s+robot\s+among|any\s+of)\b',
-            re.IGNORECASE
-        )
-
-        for subtask in subtasks:
-            m = assigned_block_re.search(subtask) or assigned_block_fallback.search(subtask)
-            if not m:
-                print("Invalid subtask structure, skipping")
-                continue
-
-            assigned_robots = m.group(1).strip()
-
-            # Extract robot numbers
-            robot_numbers = robot_num_re.findall(assigned_robots)
-
-            # Fallback: capture bare numbers if "robot(s)" isn't repeated before each number
-            if not robot_numbers:
-                robot_numbers = re.findall(r'\b\d+\b', assigned_robots)
-
-            # Normalize like ["robot1", "robot2", ...]
-            normalized_robot_numbers = [f"robot{num}" for num in robot_numbers]
-
-            # Detect phrasing that indicates a single-choice (not team) among listed robots
-            single_choice = bool(single_choice_phrase_re.search(assigned_robots))
-
-            # Team detection
-            is_team = ("team" in assigned_robots.lower()) or ("allactionrobot" in assigned_robots.lower())
-
-            # If wording says "any one/either/one of/..." and we have numbers, treat as single-robot
-            if single_choice and normalized_robot_numbers:
-                # Deterministic selection policy: smallest robot number
-                try:
-                    smallest = min(int(n[len("robot"):]) for n in normalized_robot_numbers)
-                    normalized_robot_numbers = [f"robot{smallest}"]
-                except ValueError:
-                    # Fallback to the first listed if parsing failed
-                    normalized_robot_numbers = [normalized_robot_numbers[0]]
-                is_team = False
-
-            if (not single_choice) and (len(normalized_robot_numbers) > 1):
-                is_team = True
-
-            if is_team:
-                # Team task: concatenate all team domains
-                all_domain_contents = ""
-                for robot in normalized_robot_numbers:
-                    domain_path = os.path.join(self.base_path, "resources", f"{robot}.pddl")
-                    domain_text = file_processor.read_file(domain_path)
-                    if domain_text:
-                        all_domain_contents += domain_text
-
-                if not all_domain_contents:
-                    print("No team robot domains found; skipping team prompt.")
-                    continue
-
-                problem_fileexamplepath = os.path.join(
-                    self.base_path, "data", "pythonic_plans", f"{prompt_allocation_set}_teamproblem.py"
-                )
-                problem_examplecontent = file_processor.read_file(problem_fileexamplepath) or ""
-
-                prompt = (
-                    "\n" + problem_examplecontent +
-                    "Strictly follow the structure and finish the tasks like example\n"
-                    "Subtask examination from action perspective:" + subtask +
-                    "\nDomain file content:" + all_domain_contents +
-                    "\n based on the objects available below." + objects_ai +
-                    "Task description: extract the problem files, based on the objects above, "
-                    "the preconditions, actions, and subtask examination.\n"
-                    "#IMPORTANT, strictly follow the structure, stop generating after the Problem file generation is done."
-                )
-
-                if "gpt" not in gpt_version:
-                    _, text = llm.query_model(prompt, gpt_version, max_tokens=1000, stop=["def"], frequency_penalty=0.30)
-                else:
-                    messages = [
-                        {"role": "system", "content": "You are a Robot PDDL problem Expert"},
-                        {"role": "user", "content": prompt}
-                    ]
-                    _, text = llm.query_model(messages, gpt_version, max_tokens=1000, frequency_penalty=0.4)
-
-                problem_pddl.append(text)
-
-            else:
-                # Single-robot case
-                if not normalized_robot_numbers:
-                    print("No robot number found in Assigned Robot; skipping.")
-                    print("Assigned Robots content:", assigned_robots)
-                    continue
-
-                # Deterministic single-robot choice: if multiple remain, take smallest
-                if len(normalized_robot_numbers) > 1:
-                    try:
-                        smallest = min(int(n[len("robot"):]) for n in normalized_robot_numbers)
-                        normalized_robot_numbers = [f"robot{smallest}"]
-                    except ValueError:
-                        normalized_robot_numbers = [normalized_robot_numbers[0]]
-
-                robotassignnumber = f"{normalized_robot_numbers[0].replace(' ', '')}.pddl"
-                domain_path = os.path.join(self.base_path, "resources", robotassignnumber)
-                # print("this is a solo work")
-                # print(domain_path)
-
-                domain_content = file_processor.read_file(domain_path) or ""
-                if not domain_content:
-                    print(f"Domain file not found or empty: {domain_path}")
-                    continue
-
-                problem_fileexamplepath = os.path.join(
-                    self.base_path, "data", "pythonic_plans", f"{prompt_allocation_set}_problem.py"
-                )
-                problem_examplecontent = file_processor.read_file(problem_fileexamplepath) or ""
-
-                prompt = (
-                    "\n" + problem_examplecontent +
-                    " Finish the tasks like example\n"
-                    "Subtask examination from action perspective:" + subtask +
-                    "\nDomain file content:" + domain_content +
-                    "\n based on the objects available for potential usage below." + objects_ai +
-                    "Task description: generate the problem file. Based on the objects above, "
-                    "the domain file preconditions, actions, and subtask examination. "
-                    "IMPORTANT the robot initiates strictly as not inaction and robot "
-                    "(which includes location)\n"
-                    "#IMPORTANT, strictly follow the structure, stop generating after the Problem file generation is done."
-                )
-
-                if "gpt" not in gpt_version:
-                    _, text = llm.query_model(prompt, gpt_version, max_tokens=1000, stop=["def"], frequency_penalty=0.30)
-                else:
-                    messages = [
-                        {"role": "system", "content": "You are a Robot PDDL problem Expert"},
-                        {"role": "user", "content": prompt}
-                    ]
-                    _, text = llm.query_model(messages, gpt_version, max_tokens=1400, frequency_penalty=0.4)
-
-                problem_pddl.append(text)
-
-        return problem_pddl
-
     def _validate_and_plan(self) -> None:
-        """Validate and plan all problem files."""
+        """pddl problem 파일 검증 후 fastDownward 실행"""
         try:
-            # First run LLM validator
-            #print("Running LLM validator...")
-            self.run_llmvalidator()
-            #input("Press Enter to continue")
-            # Wait for validation to complete
-            #print("Waiting 50 seconds for validation to complete...")
-            #time.sleep(50)
-            
-            # Then run planners
-            #print("Running planners...")
-            self.run_planners()
-            #input("Press Enter to continue")
+
+            self.run_llmvalidator() #검증기
+
+            self.run_planners() #fastDownward
             
         except Exception as e:
             raise PDDLError(f"Error in validation and planning: {str(e)}")
 
     def run_llmvalidator(self) -> None:
-        """Run LLM validation on problem files."""
+        """Run LLM validation on problem files and store validated .pddl files."""
         try:
-            problem_files = [f for f in os.listdir(self.file_processor.subtask_path) if f.endswith('.pddl')]
+            # subtask_pddl_problems_path (LLM이 만든 problem들)
+            src_dir = self.file_processor.subtask_pddl_problems_path
+            problem_files = [f for f in os.listdir(src_dir) if f.endswith('.pddl')]
+
+            # validated_subtask 폴더 비우기
+            self.file_processor.clean_directory(self.file_processor.validated_subtask_path)
+
+            self.validated_plan = []  # 매번 초기화
+
             for problem_file in problem_files:
-                try:
-                    problem_file_full = os.path.join(self.file_processor.subtask_path, problem_file)
-                    domain_name = self.file_processor.extract_domain_name(problem_file_full)
-                    if not domain_name:
-                        print(f"No domain specified in {problem_file}")
-                        continue
+                problem_file_full = os.path.join(src_dir, problem_file)
 
-                    domain_file = self.file_processor.find_domain_file(domain_name)
-                    if not domain_file:
-                        print(f"No domain file found for domain {domain_name}")
-                        continue
-
-                    domain_content = self.file_processor.read_file(domain_file)
-                    problem_content = self.file_processor.read_file(problem_file_full)
-
-                    prompt = (f"Domain Description:\n"
-                            f"{domain_content}\n\n"
-                            f"Problem Description:\n"
-                            f"{problem_content}\n\n"
-                            "Validate the preconditions in problem file to ensure all precondition listed object "
-                            "is included and also in domain file, and go over structure to check the parenthesis "
-                            "and syntext. Check and return only the validated problem file.")
-
-                    if "gpt" not in self.gpt_version:
-                        _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=1000, stop=["def"], frequency_penalty=0.30)
-                    else:
-                        messages = [{"role": "system", "content": "You are a Robot PDDL problem Expert"},
-                                {"role": "user", "content": prompt}]
-                        _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=1400, frequency_penalty=0.4)
-
-                    self.validated_plan.append(text)  #PG: Store validated plan
-                    code_plan = [text]
-                    self.file_processor.split_pddl_tasks(code_plan, True)  #PG: Use True to indicate validated
-                    
-                except Exception as e:
-                    print(f"Error processing file {problem_file}: {str(e)}")
+                domain_name = self.file_processor.extract_domain_name(problem_file_full)
+                if not domain_name:
+                    print(f"[VALIDATOR] No domain specified in {problem_file}")
                     continue
-                    
+
+                domain_file = self.file_processor.find_domain_file(domain_name)
+                if not domain_file:
+                    print(f"[VALIDATOR] No domain file found for domain {domain_name}")
+                    continue
+
+                domain_content = self.file_processor.read_file(domain_file)
+                problem_content = self.file_processor.read_file(problem_file_full)
+
+
+
+                prompt = (
+                    "You are a strict PDDL problem validator and repair system for Fast Downward.\n"
+                    "The DOMAIN is the single source of truth.\n"
+                    "Your job is to REWRITE the PROBLEM so that it is consistent with the DOMAIN "
+                    "and solvable when the task intent is achievable.\n\n"
+
+                    f"Domain Description (authoritative):\n{domain_content}\n\n"
+                    f"Problem Description (to be repaired):\n{problem_content}\n\n"
+
+
+                    "Output format must be:\n"
+                    "(define (problem <name>)\n"
+                    "  (:domain <domain>)\n"
+                    "  (:objects ...)\n"
+                    "  (:init ...)\n"
+                    "  (:goal (and ...))\n"
+                    ")\n"
+                )
+                if "gpt" not in self.gpt_version:
+                    _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=1400, stop=["def"], frequency_penalty=0.0)
+                else:
+                    messages = [
+                        {"role": "system", "content": "You are a PDDL validator. Output ONLY corrected PDDL."},
+                        {"role": "user", "content": prompt}
+                    ]
+                    _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=1400, frequency_penalty=0.0)
+
+                # 정규화(주석/텍스트 제거 + (define부터)
+                validated = self.file_processor.normalize_pddl(text)
+
+                # 검증 결과 저장
+                self.validated_plan.append(validated)
+
+                out_path = os.path.join(self.file_processor.validated_subtask_path, problem_file)
+                self.file_processor.write_file(out_path, validated)
+                print(f"[VALIDATED WROTE] {out_path}")
+
         except Exception as e:
             print(f"Error in run_llmvalidator: {str(e)}")
             raise
+
+    def extract_plan_actions(self, fd_stdout: str) -> list[str]:
+        """
+        'switchon robot1 faucet (1)'만 추출하는 함수
+        """
+        plan_actions = []
+        action_pattern = re.compile(r'^[a-zA-Z_]+\s+.*\(\d+\)$')
+
+        for line in fd_stdout.splitlines():
+            line = line.strip()
+            if action_pattern.match(line):
+                plan_actions.append(line)
+
+        return plan_actions
 
     def run_planners(self) -> None:
         """Run PDDL planners on problem files."""
         try:
             planner_path = os.path.join(self.base_path, "downward", "fast-downward.py")
-            problem_files = [f for f in os.listdir(self.file_processor.validated_subtask_path) if f.endswith('.pddl')]  #PG: Changed to validated_subtask_path
+            problem_dir = self.file_processor.validated_subtask_path
+            problem_files = [f for f in os.listdir(problem_dir) if f.endswith('.pddl')]  #나중에 검증기 넣을거면 여기 수정해야함
             for problem_file in problem_files:
                 try:
-                    problem_file_full = os.path.join(self.file_processor.validated_subtask_path, problem_file) #PG: Changed to validated_subtask_path
+                    problem_file_full = os.path.join(problem_dir, problem_file)
                     domain_name = self.file_processor.extract_domain_name(problem_file_full)
                     if not domain_name:
                         print(f"No domain specified in {problem_file}")
@@ -1555,9 +1300,22 @@ class TaskManager:
                         text=True,
                         timeout=300  # 5 minute timeout
                     )
-                    
-                    output_file = os.path.join(self.file_processor.validated_subtask_path, problem_file.replace('.pddl', '_plan.txt')) #PG: Changed to validated_subtask_path from subtask_path
-                    self.file_processor.write_file(output_file, result.stdout)
+                    # 플랜 액션 추출
+                    plan_actions = self.extract_plan_actions(result.stdout)
+                    self.subtask_pddl_plans.append(plan_actions)
+
+                    base_name = os.path.splitext(problem_file)[0]
+                    actions_path = os.path.join(self.file_processor.subtask_pddl_plans_path, f"{base_name}_actions.txt")
+
+                    with open(actions_path, "w") as f:
+                        f.write("\n".join(plan_actions))
+
+                    print(f"\n========== FAST-DOWNWARD OUTPUT ({problem_file}) ==========")
+                    print(plan_actions)
+                    print("===========================================================\n")
+                    print(result.stdout)
+                    print("===========================================================\n")
+
 
                     if result.stderr:
                         print(f"Warnings/Errors for {problem_file}:", result.stderr)
@@ -1571,108 +1329,6 @@ class TaskManager:
         except Exception as e:
             print(f"Error in run_planners: {str(e)}")
             raise
-
-    def _combine_all_plans(self, decomposed_plan: Union[str, List[str]]) -> str:
-        """Combine all generated plan files into a single plan.
- 
-        """
-        # Handle list input by taking first plan
-        if isinstance(decomposed_plan, list):
-            decomposed_plan = decomposed_plan[0]
-        
-        base_path = os.path.join(self.resources_path, "validated_subtask")  #PG: Changed to validated_subtask from generated_subtask
-        plan_files = [f for f in os.listdir(base_path) if f.endswith('_plan.txt')]
-        prompt = ""
-        # Add plans from files if they exist
-        if plan_files:
-            for idx, filename in enumerate(plan_files):
-                filepath = os.path.join(base_path, filename)
-                content = self.file_processor.read_file(filepath)
-                plan = self.file_processor.extract_plan_from_output(content)
-                if plan:  # Only add non-empty plans
-                    prompt += f"\nPlan {idx + 1}:\n{plan}\n"
-        
-        # Add allocation examination and initial plan
-        prompt += "\nallocation examination\n"
-        prompt += self.sequence_operations if hasattr(self, 'sequence_operations') else ""
-        prompt += "\ninitial plan examination\n"
-        prompt += decomposed_plan
-        
-        prompt += ("\nyou are robot allocation expert, Your task is, based on inital plan examination "
-                  "and allocation examination correct the subplans. Then based on your understanding "
-                  "merge the subtasks together by using timed durative actions format, where parallel "
-                  "tasks are performed at the same time. IMPORTANT: all 'variablelocation' should be "
-                  "corrected to variable itself, since variable itself includes location. and result "
-                  "must be in PDDL plan format.")
-        
-        if "gpt" not in self.gpt_version:
-            _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=1000, stop=["def"], frequency_penalty=0.15)
-        else:
-            messages = [{"role": "user", "content": prompt}]
-            _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=1300, frequency_penalty=0.0)
-        
-        return text
-
-    def _match_references_for_plan(self, plan: str, objects_ai: str) -> str:
-        """Match and correct variable locations in plan."""
-        prompt = (
-            f"{objects_ai}\n"
-            "IMPORTANT: Your TASK is based on the provided pddl plan provided in the passage below "
-            "and the object list above, modify and only modify the plan so that all 'variablelocation' "
-            "should be corrected to variable itself, since variable itself includes location. and similarly variable names should be corrected to variable itself. "
-            "IMPORTANT: the only parenthesis usage should be for the correct PDDL plan, no exception.\n\n"
-            f"{plan}"
-        )
-        
-        if "gpt" not in self.gpt_version:
-            _, text = self.llm.query_model(prompt, self.gpt_version, max_tokens=1000, stop=["def"], frequency_penalty=0.15)
-        else:
-            messages = [{"role": "user", "content": prompt}]
-            _, text = self.llm.query_model(messages, self.gpt_version, max_tokens=1300, frequency_penalty=0.0)
-        
-        return text
-
-    def process_bddl_task(self, bddl_file_path: str, available_robots: List[dict]) -> None:
-        """Process a task from BDDL file format.
-        
-        Args:
-            bddl_file_path (str): Path to BDDL file
-            available_robots (List[dict]): List of available robots
-        """
-        # Parse BDDL file
-        bddl_data = self.file_processor.parse_bddl_file(bddl_file_path)
-        
-        # Convert task name to instruction
-        task_instruction = bddl_data["task_name"].replace("-", " ").replace("_", " ")
-        
-        # Process task as before but with additional BDDL context
-        self.process_tasks(
-            test_tasks=[task_instruction],
-            available_robots=[available_robots],
-            objects_ai=bddl_data["objects"],
-            bddl_context=bddl_data  # Pass full BDDL data for reference
-        )
-
-    def create_bddl_dataset(self, tasks: List[str], output_dir: str) -> None:
-        """Create BDDL format files for a list of tasks.
-        
-        Args:
-            tasks (List[str]): List of task descriptions
-            output_dir (str): Directory to save BDDL files
-        """
-        os.makedirs(output_dir, exist_ok=True)
-        
-        for i, task in enumerate(tasks):
-            # Generate BDDL content
-            bddl_content = self._generate_bddl_content(
-                task_name=task.lower().replace(" ", "_"),
-                task_index=i,
-                objects=self.objects_ai,  # Use existing objects
-            )
-            
-            # Save BDDL file
-            output_path = os.path.join(output_dir, f"problem{i}.bddl")
-            self.file_processor.write_file(output_path, bddl_content)
 
 # 커맨드 명령어로 받은 정보 저장하는 함수
 def parse_arguments() -> argparse.Namespace:
@@ -1736,45 +1392,7 @@ def main():
         
         if args.bddl_file:
             # BDDL파일 실행할때
-            bddl_data = task_manager.file_processor.parse_bddl_file(args.bddl_file)
             print("\nBDDL Data:")
-            print(f"Task Name: {bddl_data['task_name']}")
-            print(f"Objects: {bddl_data['objects']}")
-            print(f"Init State: {bddl_data['init_state']}")
-            print(f"Goal State: {bddl_data['goal_state']}\n")
-             
-            # put-apple-in-fridge -> put apple in fridge
-            task_instruction = bddl_data["task_name"].replace("-", " ").replace("_", " ")
-            
-            # 단일 로봇 설정, 기본 설정
-            available_robots = [{
-                "name": "robot1",
-                "skills": ["grasp", "place", "pour", "move", "pick", "hold"],
-                "mass_capacity": 10.0
-            }]
-            
-            # 오브젝트 포맷 설정
-            objects_ai = f"\n\nobjects = {bddl_data['objects']}"
-            
-            # 실행
-            task_manager.process_tasks(
-                test_tasks=[task_instruction],
-                available_robots=[available_robots],
-                objects_ai=objects_ai
-            )
-            
-            # 결과
-            if args.log_results:
-                task_manager.log_results(
-                    task=task_instruction,
-                    idx=0,
-                    available_robots=available_robots,
-                    gt_test_tasks=[""], 
-                    trans_cnt_tasks=[0],
-                    min_trans_cnt_tasks=[0],
-                    objects_ai=objects_ai,
-                    bddl_file_path=args.bddl_file
-                )
         else:
             # FloorPlan 으로 실행했을때
             test_file = os.path.join("data", args.test_set, f"FloorPlan{args.floor_plan}.json")
