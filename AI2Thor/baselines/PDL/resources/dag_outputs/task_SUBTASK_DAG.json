@@ -1,0 +1,173 @@
+{
+  "task_name": "task",
+  "nodes": [
+    {
+      "id": 1,
+      "name": "subtask_01_Move_the_Bread_to_the_CounterTop",
+      "objects": [
+        "robot1",
+        "bread",
+        "countertop",
+        "diningtable"
+      ],
+      "preconds": [
+        "Robot is not in action",
+        "Robot is in the kitchen",
+        "Bread is on the dining table",
+        "Countertop is on the floor",
+        "Robot is not holding the bread"
+      ],
+      "effects": [
+        "Bread is on the countertop",
+        "Robot is not holding the bread",
+        "Robot is not in action"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "subtask_02_Move_the_Fork_to_the_Drawer",
+      "objects": [
+        "robot1",
+        "fork",
+        "drawer",
+        "diningtable",
+        "floor"
+      ],
+      "preconds": [
+        "Robot is not in action.",
+        "Robot is at the kitchen.",
+        "Fork is on the dining table.",
+        "Drawer is on the floor.",
+        "Robot is not holding the fork.",
+        "Robot is close to the drawer."
+      ],
+      "effects": [
+        "Fork is in the drawer.",
+        "Robot is close to the drawer."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "subtask_03_Move_the_Spoon_to_the_Drawer",
+      "objects": [
+        "robot1",
+        "spoon",
+        "drawer",
+        "diningtable",
+        "floor"
+      ],
+      "preconds": [
+        "Robot is not in action",
+        "Robot is at the kitchen",
+        "Spoon is on the dining table",
+        "Drawer is on the floor",
+        "Robot is not holding the spoon",
+        "Robot is close to the drawer"
+      ],
+      "effects": [
+        "Spoon is in the drawer",
+        "Robot is close to the drawer"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "subtask_04_Move_the_Pan_to_the_StoveBurner",
+      "objects": [
+        "robot1",
+        "pan",
+        "stoveburner",
+        "diningtable"
+      ],
+      "preconds": [
+        "Robot is not in action",
+        "Robot is in the kitchen",
+        "Pan is on the dining table",
+        "Stove burner is on the floor",
+        "Robot is not holding the pan"
+      ],
+      "effects": [
+        "Pan is on the stove burner",
+        "Robot is not holding the pan"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "subtask_05_Move_the_Tomato_to_the_CounterTop",
+      "objects": [
+        "robot1",
+        "tomato",
+        "countertop",
+        "diningtable"
+      ],
+      "preconds": [
+        "Robot is not in action",
+        "Robot is in the kitchen",
+        "Tomato is on the dining table",
+        "Robot is not holding the tomato"
+      ],
+      "effects": [
+        "Tomato is on the countertop",
+        "Robot is not holding the tomato"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "subtask_06_Move_the_Mug_to_the_CoffeeMachine",
+      "objects": [
+        "robot1",
+        "mug",
+        "coffeeMachine",
+        "diningTable",
+        "kitchen"
+      ],
+      "preconds": [
+        "Robot is not in action.",
+        "Robot is in the kitchen.",
+        "Mug is on the dining table.",
+        "Coffee machine is on the dining table.",
+        "Robot is not holding the mug."
+      ],
+      "effects": [
+        "Mug is at the coffee machine.",
+        "Robot is not holding the mug."
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from_id": 1,
+      "to_id": 2,
+      "dependency_type": "resource",
+      "reason": "Same drawer object - cannot be manipulated in parallel"
+    },
+    {
+      "from_id": 1,
+      "to_id": 3,
+      "dependency_type": "resource",
+      "reason": "Same drawer object - cannot be manipulated in parallel"
+    },
+    {
+      "from_id": 2,
+      "to_id": 3,
+      "dependency_type": "resource",
+      "reason": "Same drawer object - cannot be manipulated in parallel"
+    }
+  ],
+  "parallel_groups": {
+    "0": [
+      0,
+      4,
+      5,
+      6
+    ],
+    "1": [
+      1
+    ],
+    "2": [
+      2
+    ],
+    "3": [
+      3
+    ]
+  }
+}

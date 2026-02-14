@@ -1,0 +1,1 @@
+{"task": "Wash the fork and put it in the bowl", "robot list" : [27,24,25], "object_states" : [{"name": "Bowl", "contains": ["Fork"], "state": "None"}], "trans":1, "max_trans":1}

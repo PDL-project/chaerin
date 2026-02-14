@@ -1,0 +1,65 @@
+# Task Description: Move the Fork to the Drawer.
+
+# GENERAL TASK DECOMPOSITION 
+# Decompose and parallel subtasks where ever possible
+# Independent subtasks:
+
+# Initial condition analyze due to previous subtask:
+# 1. Robot not at any object location
+# 2. Robot not holding any object
+
+# SubTask 2: Move the Fork to the Drawer.
+    Skills Required: GoToObject, PickupObject, OpenObject, PutObject, CloseObject
+    Related Objects: fork(Location=diningTable), drawer(Location=floor)
+
+GoToObject(robot1, fork)
+   Preconditions:
+     (not (inaction robot1))
+   Effects:
+     (at robot1 fork)
+
+PickupObject(robot1, fork, diningTable)
+   Preconditions:
+     (at-location fork diningTable)
+     (at robot1 fork)
+     (not (inaction robot1))
+   Effects:
+     (holding robot1 fork)
+
+GoToObject(robot1, drawer)
+   Preconditions:
+     (not (inaction robot1))
+   Effects:
+     (at robot1 drawer)
+
+OpenObject(robot1, drawer)
+   Preconditions:
+     (not (inaction robot1))
+     (at robot1 drawer)
+   Effects:
+     (object-open robot1 drawer)
+     (not (object-close robot1 drawer))
+
+PutObject(robot1, fork, drawer)
+   Preconditions:
+     (holding robot1 fork)
+     (at robot1 drawer)
+     (not (inaction robot1))
+     (not (object-close robot1 drawer))
+   Effects:
+     (at-location fork drawer)
+     (not (holding robot1 fork))
+
+CloseObject(robot1, drawer)
+   Preconditions:
+     (not (inaction robot1))
+     (at robot1 drawer)
+     (object-open robot1 drawer)
+   Effects:
+     (object-close robot1 drawer)
+     (not (object-open robot1 drawer))
+
+Goal condition:
+(at-location fork drawer)
+
+# Task Move the Fork to the Drawer is done.

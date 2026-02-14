@@ -1,0 +1,21 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirTaj', 'navigate to object ReservoirLibre']","['NavigateTo(ReservoirTaj)', 'NavigateTo(ReservoirLibre)']","[True, True]",0.2857142857142857,0.1111111111111111,False
+1,"['get supply ReservoirTaj', 'get supply ReservoirLibre']","['GetSupply(ReservoirTaj)', 'GetSupply(ReservoirLibre)']","[True, True]",0.2857142857142857,0.2222222222222222,False
+2,"['navigate to object EmberFire_Region_1', 'navigate to object AgniFire_Region_1']","['NavigateTo(EmberFire_Region_1)', 'NavigateTo(AgniFire_Region_1)']","[True, True]",0.5714285714285714,0.3333333333333333,False
+3,"['use supply Sand on EmberFire', 'use supply Water on AgniFire']","['UseSupply(EmberFire, Sand)', 'UseSupply(AgniFire, Water)']","[True, True]",0.5714285714285714,0.5555555555555556,False
+4,"['navigate to object ReservoirTaj', 'use supply Water on DowntownFire_Region_1']","['NavigateTo(ReservoirTaj)', 'UseSupply(DowntownFire, Water)']","[True, False]",0.7142857142857143,0.5555555555555556,False
+5,"['get supply ReservoirTaj', 'navigate to object DowntownFire_Region_1']","['GetSupply(ReservoirTaj)', 'NavigateTo(DowntownFire_Region_1)']","[True, True]",0.7142857142857143,0.6111111111111112,False
+6,"['clear inventory', 'navigate to object ReservoirLibre']","['ClearInventory()', 'NavigateTo(ReservoirLibre)']","[True, True]",0.7142857142857143,0.6111111111111112,False
+7,"['get supply ReservoirLibre', 'get supply ReservoirLibre']","['GetSupply(ReservoirLibre)', 'GetSupply(ReservoirLibre)']","[False, True]",0.7142857142857143,0.6111111111111112,False
+8,"['navigate to object ReservoirLibre', 'navigate to object DowntownFire_Region_1']","['NavigateTo(ReservoirLibre)', 'NavigateTo(DowntownFire_Region_1)']","[True, True]",0.7142857142857143,0.6111111111111112,False
+9,"['get supply ReservoirLibre', 'use supply Water on DowntownFire_Region_1']","['GetSupply(ReservoirLibre)', 'UseSupply(DowntownFire, Water)']","[True, True]",0.7142857142857143,0.6666666666666666,False
+10,"['use supply Water on DowntownFire_Region_1', 'get supply ReservoirLibre']","['UseSupply(DowntownFire, Water)', 'GetSupply(ReservoirLibre)']","[False, False]",0.7142857142857143,0.6666666666666666,False
+11,"['navigate to object DowntownFire_Region_1', 'navigate to object ReservoirLibre']","['NavigateTo(DowntownFire_Region_1)', 'NavigateTo(ReservoirLibre)']","[True, True]",0.7142857142857143,0.6666666666666666,False
+12,"['use supply Water on DowntownFire_Region_1', 'get supply ReservoirLibre']","['UseSupply(DowntownFire, Water)', 'GetSupply(ReservoirLibre)']","[True, True]",0.7142857142857143,0.7222222222222222,False
+13,"['explore', 'explore']","['Explore()', 'Explore()']","[True, True]",0.7142857142857143,0.7222222222222222,False
+14,"['explore', 'explore']","['Explore()', 'Explore()']","[True, True]",0.7142857142857143,0.7777777777777778,False
+15,"['Idle', 'Navigate to object LostPersonThomas']","['Idle', 'NavigateTo(LostPersonThomas)']","[True, True]",0.8571428571428571,0.8333333333333334,False
+16,"['carry LostPersonThomas', 'carry LostPersonThomas']","['Carry(LostPersonThomas)', 'Carry(LostPersonThomas)']","[True, True]",0.8571428571428571,0.8888888888888888,False
+17,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9444444444444444,False
+18,"['dropoff LostPersonThomas at DepositFacility', 'dropoff LostPersonThomas at DepositFacility']","['DropOff(DepositFacility, LostPersonThomas)', 'DropOff(DepositFacility, LostPersonThomas)']","[True, True]",1.0,1.0,True
+19,"['Done', 'Done']","['Done', 'Done']","[True, True]",1.0,1.0,True

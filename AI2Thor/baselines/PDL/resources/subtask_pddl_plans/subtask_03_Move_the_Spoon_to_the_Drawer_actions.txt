@@ -1,0 +1,6 @@
+gotoobject robot1 spoon (1)
+pickupobject robot1 spoon diningtable (1)
+gotoobject robot1 drawer (1)
+openobject robot1 drawer (1)
+drophandobject robot1 spoon drawer (1)
+closeobject robot1 drawer (1)

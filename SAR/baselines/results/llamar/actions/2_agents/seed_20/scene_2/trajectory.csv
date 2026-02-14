@@ -1,0 +1,36 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirOmaha', 'navigate to object ReservoirWhosville']","['NavigateTo(ReservoirOmaha)', 'NavigateTo(ReservoirWhosville)']","[True, True]",0.3333333333333333,0.13333333333333333,False
+1,"['get supply ReservoirOmaha', 'get supply ReservoirWhosville']","['GetSupply(ReservoirOmaha)', 'GetSupply(ReservoirWhosville)']","[True, True]",0.3333333333333333,0.26666666666666666,False
+2,"['navigate to object EnglandFire_Region_1', 'navigate to object TownFire_Region_1']","['NavigateTo(EnglandFire_Region_1)', 'NavigateTo(TownFire_Region_1)']","[True, True]",0.6666666666666666,0.4,False
+3,"['use supply Sand on EnglandFire', 'use supply Water on TownFire']","['UseSupply(EnglandFire, Sand)', 'UseSupply(TownFire, Water)']","[True, True]",0.6666666666666666,0.6,False
+4,"['explore', 'explore']","['Explore()', 'Explore()']","[True, True]",0.6666666666666666,0.6666666666666666,False
+5,"['navigate to object ReservoirWhosville', 'navigate to object LostPersonJeremy']","['NavigateTo(ReservoirWhosville)', 'NavigateTo(LostPersonJeremy)']","[True, True]",0.8333333333333334,0.7333333333333333,False
+6,"['get supply ReservoirWhosville', 'carry LostPersonJeremy']","['GetSupply(ReservoirWhosville)', 'Carry(LostPersonJeremy)']","[True, True]",0.8333333333333334,0.8,False
+7,"['navigate to object TownFire_Region_2', 'navigate to object DepositFacility']","['NavigateTo(TownFire_Region_2)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.8666666666666667,False
+8,"['use supply Water on TownFire_Region_2', 'Idle']","['UseSupply(TownFire, Water)', 'Idle']","[True, True]",1.0,0.8666666666666667,False
+9,"['get supply ReservoirWhosville', 'navigate to object DepositFacility']","['GetSupply(ReservoirWhosville)', 'NavigateTo(DepositFacility)']","[False, True]",1.0,0.8666666666666667,False
+10,"['navigate to object ReservoirWhosville', 'dropoff LostPersonJeremy at DepositFacility']","['NavigateTo(ReservoirWhosville)', 'DropOff(DepositFacility, LostPersonJeremy)']","[True, False]",1.0,0.8666666666666667,False
+11,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.8666666666666667,False
+12,"['navigate to object ReservoirWhosville', 'navigate to object DepositFacility']","['NavigateTo(ReservoirWhosville)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.8666666666666667,False
+13,"['get supply ReservoirWhosville', 'navigate to object DepositFacility']","['GetSupply(ReservoirWhosville)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.8666666666666667,False
+14,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.8666666666666667,False
+15,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.8666666666666667,False
+16,"['Navigate to object DepositFacility', 'Navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.8666666666666667,False
+17,"['use supply Water on TownFire', 'Idle']","['UseSupply(TownFire, Water)', 'Idle']","[False, True]",1.0,0.8666666666666667,False
+18,"['navigate to object TownFire_Region_2', 'Idle']","['NavigateTo(TownFire_Region_2)', 'Idle']","[True, True]",1.0,0.8666666666666667,False
+19,"['use supply Water on TownFire', 'navigate to object DepositFacility']","['UseSupply(TownFire, Water)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.8666666666666667,False
+20,"['use supply Water on TownFire', 'dropoff LostPersonJeremy at DepositFacility']","['UseSupply(TownFire, Water)', 'DropOff(DepositFacility, LostPersonJeremy)']","[False, False]",1.0,0.8666666666666667,False
+21,"['navigate to object ReservoirWhosville', 'navigate to object DepositFacility']","['NavigateTo(ReservoirWhosville)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.8666666666666667,False
+22,"['get supply ReservoirWhosville', 'Idle']","['GetSupply(ReservoirWhosville)', 'Idle']","[True, True]",1.0,0.8666666666666667,False
+23,"['navigate to object TownFire_Region_2', 'Idle']","['NavigateTo(TownFire_Region_2)', 'Idle']","[True, True]",1.0,0.8666666666666667,False
+24,"['use supply Water on TownFire_Region_2', 'navigate to object DepositFacility']","['UseSupply(TownFire, Water)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+25,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+26,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+27,"['move Down', 'Idle']","['Move(Down)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+28,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+29,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+30,"['Navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+31,"['NavigateTo(DepositFacility)', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+32,"['move Right', 'move Left']","['Move(Right)', 'Move(Left)']","[True, True]",1.0,0.9333333333333333,False
+33,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+34,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False

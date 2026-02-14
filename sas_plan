@@ -1,3 +1,5 @@
-(gotoobject robot2 lightswitch)
-(switchoff robot2 lightswitch)
-; cost = 2 (unit cost)
+(gotoobject robot1 bread)
+(pickupobject robot1 bread countertop)
+(gotoobject robot1 fridge)
+(drophandobject robot1 bread fridge)
+; cost = 4 (unit cost)

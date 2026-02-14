@@ -1,0 +1,10 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirOmaha', 'navigate to object ReservoirWhosville']","['NavigateTo(ReservoirOmaha)', 'NavigateTo(ReservoirWhosville)']","[True, True]",0.3333333333333333,0.13333333333333333,False
+1,"['get supply ReservoirOmaha', 'get supply ReservoirWhosville']","['GetSupply(ReservoirOmaha)', 'GetSupply(ReservoirWhosville)']","[True, True]",0.3333333333333333,0.26666666666666666,False
+2,"['navigate to object EnglandFire_Region_1', 'navigate to object TownFire_Region_1']","['NavigateTo(EnglandFire_Region_1)', 'NavigateTo(TownFire_Region_1)']","[True, True]",0.6666666666666666,0.4,False
+3,"['use supply Sand on EnglandFire', 'navigate to object TownFire_Region_2']","['UseSupply(EnglandFire, Sand)', 'NavigateTo(TownFire_Region_2)']","[True, True]",0.6666666666666666,0.5333333333333333,False
+4,"['explore', 'use supply Water on TownFire']","['Explore()', 'UseSupply(TownFire, Water)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+5,"['navigate to object ReservoirWhosville', 'use supply Water on TownFire_Region_2']","['NavigateTo(ReservoirWhosville)', 'UseSupply(TownFire, Water)']","[True, False]",0.6666666666666666,0.6666666666666666,False
+6,"['get supply ReservoirWhosville', 'navigate to object ReservoirWhosville']","['GetSupply(ReservoirWhosville)', 'NavigateTo(ReservoirWhosville)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+7,"['navigate to object TownFire_Region_2', 'get supply ReservoirWhosville']","['NavigateTo(TownFire_Region_2)', 'GetSupply(ReservoirWhosville)']","[False, True]",0.6666666666666666,0.6666666666666666,False
+8,"['explore', 'use supply Water on TownFire_Region_2']","['Explore()', 'UseSupply(TownFire, Water)']","[True, False]",0.6666666666666666,0.6666666666666666,False

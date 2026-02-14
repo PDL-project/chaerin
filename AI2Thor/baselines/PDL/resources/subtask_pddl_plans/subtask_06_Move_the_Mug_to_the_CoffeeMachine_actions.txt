@@ -1,0 +1,4 @@
+gotoobject robot1 mug (1)
+pickupobject robot1 mug diningtable (1)
+gotoobject robot1 coffeemachine (1)
+drophandobject robot1 mug coffeemachine (1)

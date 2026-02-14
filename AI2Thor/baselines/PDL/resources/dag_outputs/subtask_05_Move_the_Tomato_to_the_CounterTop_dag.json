@@ -1,0 +1,89 @@
+{
+  "subtask_name": "subtask_05_Move_the_Tomato_to_the_CounterTop",
+  "nodes": [
+    {
+      "id": 0,
+      "action": "gotoobject robot1 tomato (1)",
+      "action_type": "gotoobject",
+      "robot": "robot1",
+      "objects": [
+        "tomato"
+      ],
+      "parallel_group": 0
+    },
+    {
+      "id": 1,
+      "action": "pickupobject robot1 tomato diningtable (1)",
+      "action_type": "pickupobject",
+      "robot": "robot1",
+      "objects": [
+        "tomato",
+        "diningtable"
+      ],
+      "parallel_group": 1
+    },
+    {
+      "id": 2,
+      "action": "gotoobject robot1 countertop (1)",
+      "action_type": "gotoobject",
+      "robot": "robot1",
+      "objects": [
+        "countertop"
+      ],
+      "parallel_group": 2
+    },
+    {
+      "id": 3,
+      "action": "drophandobject robot1 tomato countertop (1)",
+      "action_type": "drophandobject",
+      "robot": "robot1",
+      "objects": [
+        "tomato",
+        "countertop"
+      ],
+      "parallel_group": 3
+    }
+  ],
+  "edges": [
+    {
+      "from_id": 0,
+      "to_id": 1,
+      "dependency_type": "causal"
+    },
+    {
+      "from_id": 1,
+      "to_id": 2,
+      "dependency_type": "causal"
+    },
+    {
+      "from_id": 2,
+      "to_id": 3,
+      "dependency_type": "causal"
+    },
+    {
+      "from_id": 1,
+      "to_id": 3,
+      "dependency_type": "binding"
+    }
+  ],
+  "parallel_groups": {
+    "0": [
+      0
+    ],
+    "1": [
+      1
+    ],
+    "2": [
+      2
+    ],
+    "3": [
+      3
+    ]
+  },
+  "binding_edges": [
+    {
+      "from": 1,
+      "to": 3
+    }
+  ]
+}

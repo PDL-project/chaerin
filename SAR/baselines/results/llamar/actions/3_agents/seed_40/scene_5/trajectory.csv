@@ -1,0 +1,16 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirYork', 'explore', 'navigate to object ReservoirYork']","['NavigateTo(ReservoirYork)', 'Explore()', 'NavigateTo(ReservoirYork)']","[True, True, True]",0.2,0.14285714285714285,False
+1,"['Navigate to LostPersonJacob', 'Navigate to ReservoirYork', 'Get supply Water from ReservoirYork']","['NavigateTo(LostPersonJacob)', 'NavigateTo(ReservoirYork)', 'GetSupply(ReservoirYork)']","[True, True, True]",0.4,0.35714285714285715,False
+2,"['navigate to object LostPersonJacob', 'get supply ReservoirYork', 'navigate to object SussexFire_Region_1']","['NavigateTo(LostPersonJacob)', 'GetSupply(ReservoirYork)', 'NavigateTo(SussexFire_Region_1)']","[True, True, True]",0.6,0.42857142857142855,False
+3,"['navigate to object LostPersonJacob', 'navigate to object LostPersonJacob', 'use supply Water on SussexFire_Region_1']","['NavigateTo(LostPersonJacob)', 'NavigateTo(LostPersonJacob)', 'UseSupply(SussexFire, Water)']","[True, True, True]",0.6,0.5714285714285714,False
+4,"['carry LostPersonJacob', 'carry LostPersonJacob', 'explore']","['Carry(LostPersonJacob)', 'Carry(LostPersonJacob)', 'Explore()']","[True, True, True]",0.6,0.6428571428571429,False
+5,"['navigate to object DepositFacility', 'navigate to object DepositFacility', 'explore']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)', 'Explore()']","[True, True, True]",0.8,0.7142857142857143,False
+6,"['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)', 'Explore']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)', 'Explore()']","[True, True, True]",0.8,0.7142857142857143,False
+7,"['dropoff LostPersonJacob at DepositFacility', 'dropoff LostPersonJacob at DepositFacility', 'explore']","['DropOff(DepositFacility, LostPersonJacob)', 'DropOff(DepositFacility, LostPersonJacob)', 'Explore()']","[True, True, True]",0.8,0.7857142857142857,False
+8,"['Carry(LostPersonZoe)', 'Carry(LostPersonZoe)', ""NavigateTo(Alice's location)""]","['Carry(LostPersonZoe)', 'Carry(LostPersonZoe)', 'NavigateTo(Alice)']","[False, False, False]",1.0,0.7857142857142857,False
+9,"['navigate to object LostPersonZoe', 'navigate to object LostPersonZoe', 'explore']","['NavigateTo(LostPersonZoe)', 'NavigateTo(LostPersonZoe)', 'Explore()']","[True, True, True]",1.0,0.8571428571428571,False
+10,"['Carry(LostPersonZoe)', 'Carry(LostPersonZoe)', 'Explore']","['Carry(LostPersonZoe)', 'Carry(LostPersonZoe)', 'Explore()']","[True, True, True]",1.0,0.9285714285714286,False
+11,"['navigate to DepositFacility', 'navigate to DepositFacility', 'explore']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)', 'Explore()']","[True, True, True]",1.0,0.9285714285714286,False
+12,"['dropoff LostPersonZoe at DepositFacility', 'dropoff LostPersonZoe at DepositFacility', 'navigate to object DepositFacility']","['DropOff(DepositFacility, LostPersonZoe)', 'DropOff(DepositFacility, LostPersonZoe)', 'NavigateTo(DepositFacility)']","[True, True, True]",1.0,1.0,True
+13,"['explore', 'explore', 'explore']","['Explore()', 'Explore()', 'Explore()']","[True, True, True]",1.0,1.0,True
+14,"['Done', 'Done', 'Done']","['Done', 'Done', 'Done']","[True, True, True]",1.0,1.0,True

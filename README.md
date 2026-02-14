@@ -1,114 +1,131 @@
-# **LaMMA-P: Generalizable Multi-Agent Long-Horizon Task Allocation and Planning with LM-Driven PDDL Planner**
+<div align="center">
 
-This is the official repository for the LaMMA-P codebase. It includes instructions for configuring and running LaMMA-P on the MAT-THOR datasets in the AI2-THOR simulator. It is accepted as a conference paper by the IEEE International Conference on Robotics and Automation (ICRA), Atlanta, 2025.
+# LLaMAR
 
+**Long-Horizon Planning for Multi-Agent Robots in Partially Observable Environments**
 
-[Project Website](https://lamma-p.github.io/) | [Paper](https://arxiv.org/abs/2409.20560) | [Video](https://www.youtube.com/watch?v=1edDuJbk_uk)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Documentation](https://img.shields.io/badge/docs-coming_soon-red.svg)](https://github.com/nsidn98/LLaMAR)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Arxiv](https://img.shields.io/badge/arXiv-2407.10031-green)](https://arxiv.org/abs/2407.10031)
+[![License: MIT](https://img.shields.io/badge/Project-Website-blue)](https://nsidn98.github.io/LLaMAR/)
 
-<img src="docs/motivation.png" width="100%"/>
+</div>
 
-**Abstract:** Language models (LMs) possess a strong capability to comprehend natural language, making them effective in translating human instructions into detailed plans for simple robot tasks. Nevertheless, it remains a significant challenge to handle long-horizon tasks, especially in subtask identification and allocation for cooperative heterogeneous robot teams. To address this issue, we propose a Language Model-Driven Multi-Agent PDDL Planner (LaMMA-P), a novel multi-agent task planning framework that achieves state-of-the-art performance on long-horizon tasks. LaMMA-P integrates the strengths of the LMs’ reasoning capability and the traditional heuristic search planner to achieve a high success rate and efficiency while demonstrating strong generalization across tasks. Additionally, we create MAT-THOR, a comprehensive benchmark that features household tasks with two different levels of complexity based on the AI2-THOR environment. The experimental results demonstrate that LaMMA-P achieves a 105% higher success rate and 36% higher efficiency than existing LM-based multi-agent planners.
+A modular vision language model (VLM)-based framework for long-horizon planning for multi-agent robots with partial observability. This is an official implementation of the model described in:
 
-## Code Organization
-Below are the details of various important directories 
-- `resources/`: Contains robot definitions and PDDL domain files
-- `scripts/`: Main execution scripts adapted from [SMART-LLM](https://github.com/SMARTlab-Purdue/SMART-LLM)
-- `data/`: Test datasets and example tasks extended from [SMART-LLM](https://github.com/SMARTlab-Purdue/SMART-LLM)
-- `downward/`: Fast Downward planner from [Fast Downward](https://github.com/aibasel/downward/)
+"[Long-Horizon Planning for Multi-Agent Robots in Partially Observable Environments](https://arxiv.org/abs/2407.10031)",
 
-## Datasets
-The repository includes various commands and robots with different skill sets for heterogeneous robot tasks:
+Please let us know if anything here is not working as expected, and feel free to create [new issues](https://github.com/nsidn98/LLaMAR/issues) with any questions. Note that we are working to improve the codebase to make it more accessible and easy to use.
 
-- Test tasks: `data/final_test/`
-- Robot definitions: `resources/robots.py`
-- Floor plans: Refer to [AI2Thor Demo](https://ai2thor.allenai.org/demo) for layouts
+## Abstract:
 
-## Environment Setup
-### 1. Environment Setup
+The ability of Language Models (LMs) to understand natural language makes them a powerful tool for parsing human instructions into task plans for autonomous robots. Unlike traditional planning methods that rely on domain-specific knowledge and handcrafted rules, LMs generalize from diverse data and adapt to various tasks with minimal tuning, acting as a compressed knowledge base. However, LMs in their standard form face challenges with long-horizon tasks, particularly in partially observable multi-agent settings. We propose an LM-based Long-Horizon Planner for Multi-Agent Robotics (LLaMAR), a cognitive architecture for planning that achieves state-of-the-art results in long-horizon tasks within partially observable environments. LLaMAR employs a plan-act-correct-verify framework, allowing self-correction from action execution feedback without relying on oracles or simulators. Additionally, we present MAP-THOR, a comprehensive test suite encompassing household tasks of varying complexity within the AI2-THOR environment. Experiments show that LLaMAR achieves a 30% higher success rate than other state-of-the-art LM-based multi-agent planners in MAP-THOR and Search & Rescue tasks.
 
-Create a conda environment (or virtualenv):
-```bash
-conda create -n lammap python==3.9
-conda activate lammap
+![image](https://raw.githubusercontent.com/nsidn98/nsidn98.github.io/master/files/Publications_assets/LLaMAR/LLaMAR_arch.png)
+
+**Overview of LLaMAR**: LLaMAR splits the planning process into 4 sub-modules.
+
+- Planner Module - Breaks down high-level language instructions into structured subtasks for execution.
+- Actor Module - Selects high-level actions for each agent based on observations and memory.
+- Corrector Module - Identifies failures in execution and suggests corrective actions to improve task completion.
+- Verifier Module - Confirms subtask completion and updates progress, reducing reliance on external validation.
+
+This iterative Plan-Act-Correct-Verify loop helps with long-horizon multi-agent planning in partially observable environments.
+
+## Usage:
+
+Save your OpenAI API Key in a JSON file named `openai_key.json` with the following format:
+
+```json
+{ "my_openai_api_key": "<your_api_key>" }
 ```
 
-Install dependencies:
+Then execute the python file:
+
+- For MAP-THOR
+
 ```bash
-pip install -r requirements.txt
+python AI2Thor/baselines/llamar/llamar.py --task=0 --floorplan=0
 ```
 
-### 2. Fast Downward Planner Setup
-The project requires the [Fast Downward Planner](https://github.com/aibasel/downward/). Follow these steps to set it up:
+This should run an episode on the `task=0` (Put the bread, lettuce and tomato in the fridge) on `floorplan=0` (FloorPlan1)
 
-1. Clone the Fast Downward repository as a submodule:
+You can refer to `configs/config_type1.json` for the mapping on tasks and floorplans.
+
+OR
+
+- For Search & Rescue
+
 ```bash
-git submodule update --init --recursive
-cd downward
+python SAR/baselines/llamar.py --scene=1 --name='llamar_SAR' --agents=2 --seed=0
 ```
 
-2. Build the planner:
-```bash
-./build.py
-```
+This should run an episode in a scene with one fire with 2 initially lighted cells, the other fire has 1 initially lighted location. You can refer `SAR/Scenes` for more description on the scenes.
 
-3. Verify the installation:
-```bash
-./fast-downward.py --help
-```
+Note: The experiments in the paper were obtained with `gpt-4-vision-preview` which has been [deprecated](https://platform.openai.com/docs/deprecations). OpenAI [suggests](https://platform.openai.com/docs/guides/vision?lang=node) using `gpt-4o-mini`. Some of the numbers from the paper might not match.
 
-### 3. OpenAI API Setup
-The code relies on OpenAI's API for LLM functionality. To set this up:
+Warning: Running all the experiments from the paper cost us tokens worth around $3000 (due to the pricing structure of GPT-4 at the time of the experiments).
 
-1. Create an API Key at https://platform.openai.com/
-2. Create a file named `api_key.txt` in the root folder
-3. Paste your OpenAI API Key in the file
-
-## Quickstart
-
-### 1. Generate PDDL Plans
-To generate PDDL plans for tasks in AI2Thor floor plans, run:
-```bash
-python scripts/pddlrun_llmseparate.py --floor-plan <floor_plan_no>
-```
-
-Additional parameters:
-- `--gpt-version`: Choose between 'gpt-3.5-turbo', 'gpt-4o', 'gpt-3.5-turbo-16k' (default: 'gpt-4o')
-- `--prompt-decompse-set`: Set decomposition prompt set (default: 'pddl_train_task_decomposesep')
-- `--prompt-allocation-set`: Set allocation prompt set (default: 'pddl_train_task_allocationsep')
-
-The script will:
-1. Decompose the high-level task into subtasks
-2. Generate PDDL problem files for each subtask
-3. Run the Fast Downward planner on each subtask
-4. Combine the solutions into a complete plan
-
-Output files are stored in the `logs` directory, organized by timestamp and task name.
-
-### 2. Execute Plans in AI2Thor
-To execute the generated plans in the AI2Thor environment:
-Convert the target plan into code
-```bash
-python plantocode.py --logs-dir ./logs --validate-code
+## Repo Structure:
 
 ```
-then, 
-```bash
-python scripts/execute_plan.py --command <log_folder_name>
+├── README.md               # Project documentation
+├── README_mapthor.md       # MAPTHOR documentation
+├── requirements.txt        # Dependencies and package requirements
+├── AI2Thor/                # everything related to the AI2THOR experiments
+├── SAR/                    # everything related to the SAR experiments
+├── configs/                # Configuration files for different MAPTHOR tasks
+├── plots/                  # Code used to generate plots/tables in the paper
+├── thortils/               # Some utility functions for AI2THOR
+├── vlms/                   # Open source VLMs
+├── init_maker/             # Code to create new scene initialisations
+├── results/                # Some logs/outputs from the VLMs
+└── .gitignore              # Files to ignore in version control
 ```
-Replace `<log_folder_name>` with the specific folder name in the `logs` directory containing your generated plan.
+
+## Dependencies:
+
+Refer `requirements.txt` for other libraries
+
+- `pip install openai==0.27.4`
+- `pip install ai2thor==5.0.0`
+- `sentence-transformers==2.3.1`
+- `transformers==4.38.0`
+- `pip install open3d==0.16.1`
+- `pip install opencv-python==4.7.0.72`
+
+## Questions/Requests
+
+Please file an issue if you have any questions or requests about the code or the paper.
 
 ## Citation
-If you find this work useful for your research, please consider citing:
+
+If you found this codebase useful in your research, please consider citing
+
 ```bibtex
-@inproceedings{zhang2025lamma,
-  title={LaMMA-P: Generalizable Multi-Agent Long-Horizon Task Allocation and Planning with LM-Driven PDDL Planner},
-  author={Zhang, Xiaopan and Qin, Hao and Wang, Fuquan and Dong, Yue and Li, Jiachen},
-  booktitle={2025 IEEE International Conference on Robotics and Automation (ICRA)},
-  year={2025},
-  organization={IEEE}
+@inproceedings{llamar,
+  title={Long-Horizon Planning for Multi-Agent Robots in Partially Observable Environments},
+  author={Nayak, Siddharth and Orozco, Adelmo Morrison and Ten Have, Marina and Zhang, Jackson and Thirumalai, Vittal and Chen, Darren and Kapoor, Aditya and Robinson, Eric and Gopalakrishnan, Karthik and Harrison, James and Ichter, Brian and Mahajan, Anuj and Balakrishnan Hamsa},
+  booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems}
 }
 ```
 
-## Acknowledgement
+```bibtex
+@inproceedings{
+nayak2024mapthor,
+title={{MAP}-{THOR}: Benchmarking Long-Horizon Multi-Agent Planning Frameworks in Partially Observable Environments},
+author={Siddharth Nayak and Adelmo Morrison Orozco and Marina Ten Have and Vittal Thirumalai and Jackson Zhang and Darren Chen and Aditya Kapoor and Eric Robinson and Karthik Gopalakrishnan and Brian Ichter and James Harrison and Anuj Mahajan and Hamsa Balakrishnan},
+booktitle={Multi-modal Foundation Model meets Embodied AI Workshop @ ICML2024},
+year={2024},
+url={https://openreview.net/forum?id=ZygZN5egzy}
+}
+```
 
-We sincerely thank the researchers and developers for [SMART-LLM](https://github.com/SMARTlab-Purdue/SMART-LLM), [AI2THOR](https://github.com/allenai/ai2thor), and [Fast Downward](https://github.com/aibasel/downward/) for their amazing work.
+## Contributing
+
+We would love to include more scenes in MAP-THOR and would be happy to accept PRs.
+
+## License
+
+MIT License

@@ -1,0 +1,16 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirYork', 'navigate to object ReservoirUtah']","['NavigateTo(ReservoirYork)', 'NavigateTo(ReservoirUtah)']","[True, True]",0.3333333333333333,0.13333333333333333,False
+1,"['get supply ReservoirYork', 'get supply ReservoirUtah']","['GetSupply(ReservoirYork)', 'GetSupply(ReservoirUtah)']","[True, True]",0.3333333333333333,0.26666666666666666,False
+2,"['navigate to object GreatFire_Region_1', 'navigate to object CaldorFire_Region_1']","['NavigateTo(GreatFire_Region_1)', 'NavigateTo(CaldorFire_Region_1)']","[True, True]",0.6666666666666666,0.4,False
+3,"['use supply Water on GreatFire_Region_1', 'use supply Sand on CaldorFire_Region_1']","['UseSupply(GreatFire, Water)', 'UseSupply(CaldorFire, Sand)']","[True, True]",0.6666666666666666,0.6,False
+4,"['get supply ReservoirUtah', 'explore']","['GetSupply(ReservoirUtah)', 'Explore()']","[False, True]",0.6666666666666666,0.6666666666666666,False
+5,"['navigate to object ReservoirUtah', 'navigate to object ReservoirUtah']","['NavigateTo(ReservoirUtah)', 'NavigateTo(ReservoirUtah)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+6,"['get supply ReservoirUtah', 'get supply ReservoirUtah']","['GetSupply(ReservoirUtah)', 'GetSupply(ReservoirUtah)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+7,"['use supply Sand on CaldorFire_Region_1', 'use supply Sand on CaldorFire_Region_2']","['UseSupply(CaldorFire, Sand)', 'UseSupply(CaldorFire, Sand)']","[False, False]",0.6666666666666666,0.6666666666666666,False
+8,"['navigate to object CaldorFire_Region_2', 'navigate to object CaldorFire_Region_2']","['NavigateTo(CaldorFire_Region_2)', 'NavigateTo(CaldorFire_Region_2)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+9,"['use supply Sand on CaldorFire_Region_2', 'use supply Sand on CaldorFire_Region_2']","['UseSupply(CaldorFire, Sand)', 'UseSupply(CaldorFire, Sand)']","[True, True]",0.6666666666666666,0.7333333333333333,False
+10,"['navigate to object LostPersonTimmy', 'navigate to object LostPersonTimmy']","['NavigateTo(LostPersonTimmy)', 'NavigateTo(LostPersonTimmy)']","[True, True]",0.8333333333333334,0.8,False
+11,"['Carry(LostPersonTimmy)', 'Carry(LostPersonTimmy)']","['Carry(LostPersonTimmy)', 'Carry(LostPersonTimmy)']","[True, True]",0.8333333333333334,0.8666666666666667,False
+12,"['Navigate to object DepositFacility', 'Navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+13,"['dropoff LostPersonTimmy at DepositFacility', 'dropoff LostPersonTimmy at DepositFacility']","['DropOff(DepositFacility, LostPersonTimmy)', 'DropOff(DepositFacility, LostPersonTimmy)']","[True, True]",1.0,1.0,True
+14,"['Done', 'Done']","['Done', 'Done']","[True, True]",1.0,1.0,True

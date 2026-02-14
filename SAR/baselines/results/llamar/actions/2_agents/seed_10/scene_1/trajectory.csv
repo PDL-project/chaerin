@@ -1,0 +1,36 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirYork', 'navigate to object ReservoirUtah']","['NavigateTo(ReservoirYork)', 'NavigateTo(ReservoirUtah)']","[True, True]",0.3333333333333333,0.13333333333333333,False
+1,"['get supply ReservoirYork', 'get supply ReservoirUtah']","['GetSupply(ReservoirYork)', 'GetSupply(ReservoirUtah)']","[True, True]",0.3333333333333333,0.26666666666666666,False
+2,"['navigate to object GreatFire_Region_1', 'navigate to object CaldorFire_Region_1']","['NavigateTo(GreatFire_Region_1)', 'NavigateTo(CaldorFire_Region_1)']","[True, True]",0.6666666666666666,0.4,False
+3,"['use supply Water on GreatFire_Region_1', 'use supply Sand on CaldorFire_Region_1']","['UseSupply(GreatFire, Water)', 'UseSupply(CaldorFire, Sand)']","[True, True]",0.6666666666666666,0.6,False
+4,"['navigate to object CaldorFire_Region_2', 'explore']","['NavigateTo(CaldorFire_Region_2)', 'Explore()']","[True, True]",0.6666666666666666,0.6666666666666666,False
+5,"['use supply Sand on CaldorFire_Region_2', 'navigate to object ReservoirUtah']","['UseSupply(CaldorFire, Sand)', 'NavigateTo(ReservoirUtah)']","[False, True]",0.6666666666666666,0.6666666666666666,False
+6,"['navigate to object ReservoirUtah', 'navigate to object CaldorFire_Region_2']","['NavigateTo(ReservoirUtah)', 'NavigateTo(CaldorFire_Region_2)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+7,"['get supply ReservoirUtah', 'get supply ReservoirUtah']","['GetSupply(ReservoirUtah)', 'GetSupply(ReservoirUtah)']","[True, False]",0.6666666666666666,0.6666666666666666,False
+8,"['navigate to object CaldorFire_Region_2', 'navigate to object ReservoirUtah']","['NavigateTo(CaldorFire_Region_2)', 'NavigateTo(ReservoirUtah)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+9,"['use supply Sand on CaldorFire_Region_2', 'get supply ReservoirUtah']","['UseSupply(CaldorFire, Sand)', 'GetSupply(ReservoirUtah)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+10,"['navigate to object ReservoirUtah', 'navigate to object CaldorFire_Region_2']","['NavigateTo(ReservoirUtah)', 'NavigateTo(CaldorFire_Region_2)']","[True, True]",0.6666666666666666,0.6666666666666666,False
+11,"['get supply ReservoirUtah', 'use supply Sand on CaldorFire_Region_2']","['GetSupply(ReservoirUtah)', 'UseSupply(CaldorFire, Sand)']","[True, True]",0.6666666666666666,0.7333333333333333,False
+12,"['clear inventory', 'navigate to object LostPersonTimmy']","['ClearInventory()', 'NavigateTo(LostPersonTimmy)']","[True, True]",0.8333333333333334,0.8,False
+13,"['carry LostPersonTimmy', 'carry LostPersonTimmy']","['Carry(LostPersonTimmy)', 'Carry(LostPersonTimmy)']","[False, True]",0.8333333333333334,0.8666666666666667,False
+14,"['navigate to object LostPersonTimmy', 'navigate to object DepositFacility']","['NavigateTo(LostPersonTimmy)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+15,"['navigate to DepositFacility', 'dropoff LostPersonTimmy at DepositFacility']","['NavigateTo(DepositFacility)', 'DropOff(DepositFacility, LostPersonTimmy)']","[True, False]",1.0,0.9333333333333333,False
+16,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+17,"['move Down', 'navigate to object DepositFacility']","['Move(Down)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+18,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+19,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+20,"['Navigate to DepositFacility', 'Navigate to DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+21,"['move Left', 'move Right']","['Move(Left)', 'Move(Right)']","[True, True]",1.0,0.9333333333333333,False
+22,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+23,"['Navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+24,"['navigate to object LostPersonTimmy', 'navigate to object DepositFacility']","['NavigateTo(LostPersonTimmy)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+25,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+26,"['move Down', 'move Up']","['Move(Down)', 'Move(Up)']","[False, True]",1.0,0.9333333333333333,False
+27,"['move Up', 'move Up']","['Move(Up)', 'Move(Up)']","[True, True]",1.0,0.9333333333333333,False
+28,"['move Right', 'move Up']","['Move(Right)', 'Move(Up)']","[True, True]",1.0,0.9333333333333333,False
+29,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+30,"['Navigate to DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+31,"['move Right', 'navigate to object DepositFacility']","['Move(Right)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9333333333333333,False
+32,"['navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+33,"['navigate to object DepositFacility', 'idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False
+34,"['Navigate to DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'Idle']","[True, True]",1.0,0.9333333333333333,False

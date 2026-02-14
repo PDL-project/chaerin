@@ -1,0 +1,8 @@
+{
+"task_folder" : "1_close_all_cabinets",
+"task_type" : "manipulation",
+"task_complexity" : "simple",
+"no_movement" : false,
+"actions" : {"OpenObject" : ["cabinet"]},
+"docs" : "Opened all cabinets in the pre-initialization"
+}

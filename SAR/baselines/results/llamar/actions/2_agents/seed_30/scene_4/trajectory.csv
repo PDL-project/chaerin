@@ -1,0 +1,23 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirTaj', 'navigate to object ReservoirTaj']","['NavigateTo(ReservoirTaj)', 'NavigateTo(ReservoirTaj)']","[True, True]",0.25,0.1,False
+1,"['get supply ReservoirTaj', 'get supply ReservoirTaj']","['GetSupply(ReservoirTaj)', 'GetSupply(ReservoirTaj)']","[True, True]",0.25,0.2,False
+2,"['navigate to object RedFire_Region_1', 'navigate to object RedFire_Region_2']","['NavigateTo(RedFire_Region_1)', 'NavigateTo(RedFire_Region_2)']","[True, True]",0.5,0.3,False
+3,"['use supply Sand on RedFire_Region_1', 'use supply Sand on RedFire_Region_2']","['UseSupply(RedFire, Sand)', 'UseSupply(RedFire, Sand)']","[True, True]",0.5,0.4,False
+4,"['get supply ReservoirTaj', 'get supply ReservoirTaj']","['GetSupply(ReservoirTaj)', 'GetSupply(ReservoirTaj)']","[True, False]",0.5,0.4,False
+5,"['use supply Sand on RedFire', 'navigate to object ReservoirTaj']","['UseSupply(RedFire, Sand)', 'NavigateTo(ReservoirTaj)']","[True, True]",0.5,0.4,False
+6,"['navigate to object ReservoirTaj', 'get supply ReservoirTaj']","['NavigateTo(ReservoirTaj)', 'GetSupply(ReservoirTaj)']","[True, True]",0.5,0.4,False
+7,"['get supply ReservoirTaj', 'navigate to object RedFire']","['GetSupply(ReservoirTaj)', 'NavigateTo(RedFire_Region_1)']","[True, False]",0.5,0.4,False
+8,"['use supply Sand on RedFire_Region_3', 'explore']","['UseSupply(RedFire, Sand)', 'Explore()']","[True, True]",0.5,0.5,False
+9,"['navigate to object ReservoirTaj', 'navigate to object RedFire_Region_3']","['NavigateTo(ReservoirTaj)', 'NavigateTo(RedFire_Region_3)']","[True, True]",0.5,0.5,False
+10,"['get supply ReservoirTaj', 'use supply Sand on RedFire']","['GetSupply(ReservoirTaj)', 'UseSupply(RedFire, Sand)']","[True, True]",0.5,0.5,False
+11,"['use supply Sand on RedFire', 'get supply ReservoirTaj']","['UseSupply(RedFire, Sand)', 'GetSupply(ReservoirTaj)']","[True, False]",0.5,0.5,False
+12,"['use supply Sand on RedFire', 'navigate to object ReservoirTaj']","['UseSupply(RedFire, Sand)', 'NavigateTo(ReservoirTaj)']","[False, True]",0.5,0.5,False
+13,"['navigate to object RedFire_Region_1', 'get supply ReservoirTaj']","['NavigateTo(RedFire_Region_1)', 'GetSupply(ReservoirTaj)']","[False, True]",0.5,0.5,False
+14,"['explore', 'navigate to object RedFire_Region_3']","['Explore()', 'NavigateTo(RedFire_Region_3)']","[True, True]",0.5,0.5,False
+15,"['navigate to object ReservoirTaj', 'use supply Sand on RedFire']","['NavigateTo(ReservoirTaj)', 'UseSupply(RedFire, Sand)']","[True, True]",0.5,0.6,False
+16,"['navigate to object ReservoirTaj', 'navigate to object RedFire_Region_1']","['NavigateTo(ReservoirTaj)', 'NavigateTo(RedFire_Region_1)']","[True, False]",0.5,0.6,False
+17,"['navigate to object LostPersonThomas', 'navigate to object LostPersonThomas']","['NavigateTo(LostPersonThomas)', 'NavigateTo(LostPersonThomas)']","[True, True]",0.75,0.7,False
+18,"['carry LostPersonThomas', 'carry LostPersonThomas']","['Carry(LostPersonThomas)', 'Carry(LostPersonThomas)']","[True, True]",0.75,0.8,False
+19,"['navigate to object DepositFacility', 'navigate to object DepositFacility']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)']","[True, True]",1.0,0.9,False
+20,"['dropoff LostPersonThomas at DepositFacility', 'dropoff LostPersonThomas at DepositFacility']","['DropOff(DepositFacility, LostPersonThomas)', 'DropOff(DepositFacility, LostPersonThomas)']","[True, True]",1.0,1.0,True
+21,"['Done', 'Done']","['Done', 'Done']","[True, True]",1.0,1.0,True

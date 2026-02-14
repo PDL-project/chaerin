@@ -1,0 +1,47 @@
+# Task Description: Move the Pan to the StoveBurner.
+
+# GENERAL TASK DECOMPOSITION 
+# Decompose and parallel subtasks where ever possible
+# Independent subtasks:
+
+# Initial condition analyze due to previous subtask:
+# 1. Robot not at any object location
+# 2. Robot not holding any object
+
+# SubTask 4: Move the Pan to the StoveBurner.
+    Skills Required: GoToObject, PickupObject, PutObject
+    Related Objects: pan(Location=diningTable), stoveBurner(Location=floor)
+
+GoToObject(robot1, pan)
+   Preconditions:
+     (not (inaction robot1))
+   Effects:
+     (at robot1 pan)
+
+PickupObject(robot1, pan, diningTable)
+   Preconditions:
+     (at-location pan diningTable)
+     (at robot1 pan)
+     (not (inaction robot1))
+   Effects:
+     (holding robot1 pan)
+
+GoToObject(robot1, stoveBurner)
+   Preconditions:
+     (not (inaction robot1))
+   Effects:
+     (at robot1 stoveBurner)
+
+PutObject(robot1, pan, stoveBurner)
+   Preconditions:
+     (holding robot1 pan)
+     (at robot1 stoveBurner)
+     (not (inaction robot1))
+   Effects:
+     (at-location pan stoveBurner)
+     (not (holding robot1 pan))
+
+Goal condition:
+(at-location pan stoveBurner)
+
+# Task Move the Pan to the StoveBurner is done.

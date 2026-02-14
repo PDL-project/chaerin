@@ -1,0 +1,49 @@
+# Task Description: Move the Mug to the CoffeeMachine.
+
+# GENERAL TASK DECOMPOSITION 
+# Decompose and parallel subtasks where ever possible
+# Independent subtasks:
+
+# Initial condition analyze due to previous subtask:
+# 1. Robot not at any object location
+# 2. Robot not holding any object
+
+# SubTask 6: Move the Mug to the CoffeeMachine.
+    Skills Required: GoToObject, PickupObject, PutObject
+    Related Objects: mug(Location=diningTable), coffeeMachine(Location=diningTable)
+
+GoToObject(robot1, mug)
+   Preconditions:
+     (not (inaction robot1))
+   Effects:
+     (at robot1 mug)
+
+PickupObject(robot1, mug, diningTable)
+   Preconditions:
+     (at-location mug diningTable)
+     (at robot1 mug)
+     (not (inaction robot1))
+   Effects:
+     (holding robot1 mug)
+
+GoToObject(robot1, coffeeMachine)
+   Preconditions:
+     (not (inaction robot1))
+   Effects:
+     (at robot1 coffeeMachine)
+
+PutObject(robot1, mug, coffeeMachine)
+   Preconditions:
+     (holding robot1 mug)
+     (at robot1 coffeeMachine)
+     (not (inaction robot1))
+     (not (is-fridge coffeeMachine))
+     (not (object-close robot1 coffeeMachine))
+   Effects:
+     (at-location mug coffeeMachine)
+     (not (holding robot1 mug))
+
+Goal condition:
+(at-location mug coffeeMachine)
+
+# Task Move the Mug to the CoffeeMachine is done.

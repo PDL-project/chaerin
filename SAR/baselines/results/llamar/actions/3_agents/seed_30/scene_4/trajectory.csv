@@ -1,0 +1,15 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirTaj', 'navigate to object ReservoirTaj', 'explore']","['NavigateTo(ReservoirTaj)', 'NavigateTo(ReservoirTaj)', 'Explore()']","[True, True, True]",0.25,0.1,False
+1,"['get supply ReservoirTaj', 'get supply ReservoirTaj', 'get supply ReservoirTaj']","['GetSupply(ReservoirTaj)', 'GetSupply(ReservoirTaj)', 'GetSupply(ReservoirTaj)']","[True, True, False]",0.25,0.2,False
+2,"['use supply Sand on RedFire_Region_1', 'use supply Sand on RedFire_Region_2', 'navigate to object ReservoirTaj']","['UseSupply(RedFire, Sand)', 'UseSupply(RedFire, Sand)', 'NavigateTo(ReservoirTaj)']","[True, True, True]",0.5,0.3,False
+3,"['use supply Sand on RedFire_Region_3', 'use supply Sand on RedFire', 'get supply ReservoirTaj']","['UseSupply(RedFire, Sand)', 'UseSupply(RedFire, Sand)', 'GetSupply(ReservoirTaj)']","[False, False, True]",0.5,0.3,False
+4,"['get supply ReservoirTaj', 'get supply ReservoirTaj', 'navigate to object RedFire_Region_3']","['GetSupply(ReservoirTaj)', 'GetSupply(ReservoirTaj)', 'NavigateTo(RedFire_Region_3)']","[True, True, True]",0.5,0.4,False
+5,"['navigate to object RedFire_Region_1', 'navigate to object RedFire_Region_2', 'use supply Sand on RedFire_Region_3']","['NavigateTo(RedFire_Region_1)', 'NavigateTo(RedFire_Region_2)', 'UseSupply(RedFire, Sand)']","[True, True, True]",0.5,0.4,False
+6,"['use supply Sand on RedFire_Region_1', 'use supply Sand on RedFire_Region_2', 'navigate to object RedFire_Region_3']","['UseSupply(RedFire, Sand)', 'UseSupply(RedFire, Sand)', 'NavigateTo(RedFire_Region_3)']","[True, True, False]",0.5,0.5,False
+7,"['explore', 'explore', 'explore']","['Explore()', 'Explore()', 'Explore()']","[True, True, True]",0.5,0.6,False
+8,"['Navigate to LostPersonThomas', 'Navigate to LostPersonThomas', 'Idle']","['NavigateTo(LostPersonThomas)', 'NavigateTo(LostPersonThomas)', 'Idle']","[True, True, True]",0.75,0.7,False
+9,"['Carry(LostPersonThomas)', 'Carry(LostPersonThomas)', 'NavigateTo(DepositFacility)']","['Carry(LostPersonThomas)', 'Carry(LostPersonThomas)', 'NavigateTo(DepositFacility)']","[True, True, True]",1.0,0.9,False
+10,"['navigate to object DepositFacility', 'navigate to object DepositFacility', 'Idle']","['NavigateTo(DepositFacility)', 'NavigateTo(DepositFacility)', 'Idle']","[True, True, True]",1.0,0.9,False
+11,"['dropoff LostPersonThomas at DepositFacility', 'dropoff LostPersonThomas at DepositFacility', 'move Down']","['DropOff(DepositFacility, LostPersonThomas)', 'DropOff(DepositFacility, LostPersonThomas)', 'Move(Down)']","[True, True, True]",1.0,1.0,True
+12,"['explore', 'explore', 'explore']","['Explore()', 'Explore()', 'Explore()']","[False, True, True]",1.0,1.0,True
+13,"['Done', 'Done', 'Done']","['Done', 'Done', 'Done']","[True, True, True]",1.0,1.0,True

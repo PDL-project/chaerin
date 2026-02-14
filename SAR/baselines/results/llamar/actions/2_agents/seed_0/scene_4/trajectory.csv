@@ -1,0 +1,36 @@
+Step,Pre-Action,Action,Success,Coverage,Transport Rate,Finished
+0,"['navigate to object ReservoirTaj', 'navigate to object ReservoirTaj']","['NavigateTo(ReservoirTaj)', 'NavigateTo(ReservoirTaj)']","[True, True]",0.25,0.1,False
+1,"['get supply ReservoirTaj', 'get supply ReservoirTaj']","['GetSupply(ReservoirTaj)', 'GetSupply(ReservoirTaj)']","[True, True]",0.25,0.2,False
+2,"['use supply Sand on RedFire_Region_1', 'use supply Sand on RedFire_Region_2']","['UseSupply(RedFire, Sand)', 'UseSupply(RedFire, Sand)']","[True, False]",0.5,0.3,False
+3,"['navigate to object RedFire_Region_1', 'navigate to object RedFire_Region_2']","['NavigateTo(RedFire_Region_1)', 'NavigateTo(RedFire_Region_2)']","[True, True]",0.5,0.4,False
+4,"['get supply ReservoirTaj', 'use supply Sand on RedFire_Region_2']","['GetSupply(ReservoirTaj)', 'UseSupply(RedFire, Sand)']","[False, True]",0.5,0.4,False
+5,"['navigate to object ReservoirTaj', 'use supply Sand on RedFire']","['NavigateTo(ReservoirTaj)', 'UseSupply(RedFire, Sand)']","[True, False]",0.5,0.4,False
+6,"['navigate to object ReservoirLibre', 'navigate to object ReservoirLibre']","['NavigateTo(ReservoirLibre)', 'NavigateTo(ReservoirLibre)']","[True, True]",0.5,0.4,False
+7,"['get supply ReservoirLibre', 'get supply ReservoirLibre']","['GetSupply(ReservoirLibre)', 'GetSupply(ReservoirLibre)']","[True, True]",0.5,0.4,False
+8,"['explore north to locate LostPersonThomas', 'use supply Water on RedFire_Region_1']","['NavigateTo(LostPersonThomas)', 'UseSupply(RedFire, Water)']","[False, False]",0.75,0.4,False
+9,"['explore north to locate LostPersonThomas', 'navigate to object RedFire_Region_1']","['NavigateTo(LostPersonThomas)', 'NavigateTo(RedFire_Region_1)']","[False, True]",0.75,0.4,False
+10,"['explore north to locate LostPersonThomas', 'use supply Water on RedFire_Region_3']","['NavigateTo(LostPersonThomas)', 'UseSupply(RedFire, Water)']","[False, False]",0.75,0.4,False
+11,"['explore north to locate LostPersonThomas', 'use supply Water on RedFire_Region_1']","['NavigateTo(LostPersonThomas)', 'UseSupply(RedFire, Water)']","[False, False]",0.75,0.4,False
+12,"['explore', 'use supply Water on RedFire_Region_1']","['Explore()', 'UseSupply(RedFire, Water)']","[True, False]",0.75,0.4,False
+13,"['use supply Water on RedFire_Region_1', 'navigate to object ReservoirLibre']","['UseSupply(RedFire, Water)', 'NavigateTo(ReservoirLibre)']","[False, True]",0.75,0.4,False
+14,"['navigate to object RedFire_Region_1', 'get supply ReservoirLibre']","['NavigateTo(RedFire_Region_1)', 'GetSupply(ReservoirLibre)']","[True, True]",0.75,0.4,False
+15,"['use supply Water on RedFire_Region_1', 'navigate to object RedFire_Region_4']","['UseSupply(RedFire, Water)', 'NavigateTo(RedFire_Region_1)']","[False, True]",0.75,0.4,False
+16,"['navigate to object RedFire_Region_1', 'use supply Water on RedFire_Region_1']","['NavigateTo(RedFire_Region_1)', 'UseSupply(RedFire, Water)']","[True, False]",0.75,0.4,False
+17,"['navigate to object ReservoirLibre', 'use supply Water on RedFire_Region_1']","['NavigateTo(ReservoirLibre)', 'UseSupply(RedFire, Water)']","[True, False]",0.75,0.4,False
+18,"['get supply ReservoirLibre', 'use supply Water on RedFire_Region_4']","['GetSupply(ReservoirLibre)', 'UseSupply(RedFire, Water)']","[True, False]",0.75,0.4,False
+19,"['use supply Water on RedFire_Region_7', 'navigate to object RedFire_Region_4']","['UseSupply(RedFire, Water)', 'NavigateTo(RedFire_Region_1)']","[False, True]",0.75,0.4,False
+20,"['navigate to object RedFire_Region_16', 'use supply Water on RedFire_Region_1']","['NavigateTo(RedFire_Region_1)', 'UseSupply(RedFire, Water)']","[True, False]",0.75,0.4,False
+21,"['get supply ReservoirLibre', 'navigate to object RedFire_Region_1']","['GetSupply(ReservoirLibre)', 'NavigateTo(RedFire_Region_1)']","[False, True]",0.75,0.4,False
+22,"['navigate to object ReservoirLibre', 'use supply Water on RedFire_Region_1']","['NavigateTo(ReservoirLibre)', 'UseSupply(RedFire, Water)']","[True, False]",0.75,0.4,False
+23,"['get supply ReservoirLibre', 'navigate to object RedFire_Region_4']","['GetSupply(ReservoirLibre)', 'NavigateTo(RedFire_Region_1)']","[True, True]",0.75,0.4,False
+24,"['use supply Water on RedFire_Region_11', 'get supply ReservoirLibre']","['UseSupply(RedFire, Water)', 'GetSupply(ReservoirLibre)']","[False, False]",0.75,0.4,False
+25,"['navigate to object ReservoirLibre', 'navigate to object ReservoirLibre']","['NavigateTo(ReservoirLibre)', 'NavigateTo(ReservoirLibre)']","[True, True]",0.75,0.4,False
+26,"['get supply ReservoirLibre', 'get supply ReservoirLibre']","['GetSupply(ReservoirLibre)', 'GetSupply(ReservoirLibre)']","[True, True]",0.75,0.4,False
+27,"['use supply Water on RedFire_Region_1', 'move Left']","['UseSupply(RedFire, Water)', 'Move(Left)']","[False, True]",0.75,0.4,False
+28,"['navigate to object RedFire_Region_5', 'use supply Water on RedFire_Region_4']","['NavigateTo(RedFire_Region_1)', 'UseSupply(RedFire, Water)']","[True, False]",0.75,0.4,False
+29,"['navigate to object ReservoirLibre', 'navigate to object ReservoirLibre']","['NavigateTo(ReservoirLibre)', 'NavigateTo(ReservoirLibre)']","[True, True]",0.75,0.4,False
+30,"['get supply ReservoirLibre', 'get supply ReservoirLibre']","['GetSupply(ReservoirLibre)', 'GetSupply(ReservoirLibre)']","[True, True]",0.75,0.4,False
+31,"['move Left', 'navigate to object RedFire_Region_4']","['Move(Left)', 'NavigateTo(RedFire_Region_1)']","[True, True]",0.75,0.4,False
+32,"['use supply Water on RedFire', 'use supply Water on RedFire_Region_1']","['UseSupply(RedFire, Water)', 'UseSupply(RedFire, Water)']","[False, False]",0.75,0.4,False
+33,"['get supply ReservoirLibre', 'get supply ReservoirLibre']","['GetSupply(ReservoirLibre)', 'GetSupply(ReservoirLibre)']","[True, False]",0.75,0.4,False
+34,"['use supply Water on RedFire_Region_7', 'navigate to object ReservoirLibre']","['UseSupply(RedFire, Water)', 'NavigateTo(ReservoirLibre)']","[False, True]",0.75,0.4,False
